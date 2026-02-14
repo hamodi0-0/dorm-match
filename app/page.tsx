@@ -80,8 +80,8 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Header isLoggedIn={isLoggedIn} />
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header isLoggedIn={isLoggedIn} isOnboarded={isOnboarded} />
       <main className="flex-1">
         <Hero />
         <About />
@@ -93,7 +93,6 @@ export default function LandingPage() {
         />
       </main>
       <Footer />
-
       <LoginModal
         open={loginModalOpen}
         onOpenChange={setLoginModalOpen}
