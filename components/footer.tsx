@@ -2,20 +2,18 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 border-t mt-20">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <footer className="bg-muted/50 border-t ">
+      <div className="max-w-7xl mx-auto px-6 pt-32 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">D</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                Dorm Match
-              </span>
+              <span className="text-xl font-bold">Dorm Match</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Find your perfect university roommate match based on lifestyle
               compatibility.
             </p>
@@ -23,12 +21,12 @@ export function Footer() {
 
           {/* Product */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Product</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-semibold mb-4">Product</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link
                   href="#features"
-                  className="hover:text-gray-900 transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   Features
                 </Link>
@@ -36,14 +34,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#how-it-works"
-                  className="hover:text-gray-900 transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document
-                      .getElementById("how-it-works")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                    history.pushState(null, "", "#how-it-works");
-                  }}
+                  className="hover:text-foreground transition-colors"
                 >
                   How It Works
                 </Link>
@@ -51,14 +42,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#about"
-                  className="hover:text-gray-900 transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document
-                      .getElementById("about")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                    history.pushState(null, "", "#about");
-                  }}
+                  className="hover:text-foreground transition-colors"
                 >
                   About
                 </Link>
@@ -68,20 +52,20 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Support</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-semibold mb-4">Support</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
+                <a href="#" className="hover:text-foreground transition-colors">
                   Help Center
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
+                <a href="#" className="hover:text-foreground transition-colors">
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
+                <a href="#" className="hover:text-foreground transition-colors">
                   FAQ
                 </a>
               </li>
@@ -90,50 +74,41 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link
-                  href="#"
-                  className="hover:text-gray-900 transition-colors"
-                >
+                <a href="#" className="hover:text-foreground transition-colors">
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  href="#"
-                  className="hover:text-gray-900 transition-colors"
-                >
+                <a href="#" className="hover:text-foreground transition-colors">
                   Terms of Service
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  href="#"
-                  className="hover:text-gray-900 transition-colors"
-                >
+                <a href="#" className="hover:text-foreground transition-colors">
                   Cookie Policy
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             © 2025 Dorm Match. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-gray-600">
-            <Link href="#" className="hover:text-gray-900 transition-colors">
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">
               Twitter
-            </Link>
-            <Link href="#" className="hover:text-gray-900 transition-colors">
+            </a>
+            <a href="#" className="hover:text-foreground transition-colors">
               Instagram
-            </Link>
-            <Link href="#" className="hover:text-gray-900 transition-colors">
+            </a>
+            <a href="#" className="hover:text-foreground transition-colors">
               LinkedIn
-            </Link>
+            </a>
           </div>
         </div>
       </div>

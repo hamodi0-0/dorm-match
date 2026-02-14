@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+// get google icon from react-icons
+import { FcGoogle } from "react-icons/fc";
 import {
   Dialog,
   DialogContent,
@@ -61,6 +63,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             size="lg"
             disabled={isLoading}
           >
+            <FcGoogle />
             {isLoading ? "Redirecting to Google..." : "Continue with Google"}
           </Button>
 
