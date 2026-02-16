@@ -1,6 +1,16 @@
-import Link from "next/link";
+"use client";
 
 export function Footer() {
+  const handleNavClick = (e: any, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.pushState(null, "", `#${id}`);
+    } else {
+      window.location.hash = id;
+    }
+  };
   return (
     <footer className="bg-muted/50 border-t ">
       <div className="max-w-7xl mx-auto px-6 pt-32 pb-12">
@@ -24,28 +34,31 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link
+                <a
                   href="#features"
+                  onClick={(e) => handleNavClick(e, "features")}
                   className="hover:text-foreground transition-colors"
                 >
                   Features
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
+                <a
                   href="#how-it-works"
+                  onClick={(e) => handleNavClick(e, "how-it-works")}
                   className="hover:text-foreground transition-colors"
                 >
                   How It Works
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
+                <a
                   href="#about"
+                  onClick={(e) => handleNavClick(e, "about")}
                   className="hover:text-foreground transition-colors"
                 >
                   About
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
