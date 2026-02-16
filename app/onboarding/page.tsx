@@ -69,6 +69,7 @@ export default function OnboardingPage() {
     resetOnboarding,
   } = useOnboardingStore();
   const [canProceed, setCanProceed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isLastStep = currentStep === totalSteps - 1;
   const isFirstStep = currentStep === 0;
@@ -84,6 +85,7 @@ export default function OnboardingPage() {
   }, [currentStep, data]);
 
   const handleFinish = async () => {
+    setIsLoading(true);
     try {
       const supabase = createClient();
       const {
@@ -95,37 +97,62 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Save to database
-      const { error } = await supabase.from("user_profiles").upsert({
+      // Prepare data for student_profiles table (matches new schema)
+      const profileData = {
         id: user.id,
-        ...data,
-        is_onboarded: true,
+        full_name: data.full_name,
+        phone: data.phone,
+        avatar_url: data.avatar_url || null,
+        gender: data.gender,
+        university_name: data.university_name,
+        university_email: user.email, // From auth.users
+        email_verified: true, // Already verified via email link
+        year_of_study: data.year_of_study,
+        major: data.major,
+        bio: data.bio || null,
+        sleep_schedule: data.sleep_schedule,
+        cleanliness: data.cleanliness,
+        noise_level: data.noise_level,
+        guests_frequency: data.guests_frequency,
+        study_location: data.study_location,
+        smoking: data.smoking,
+        pets: data.pets,
+        diet_preference: data.diet_preference,
+        hobbies: data.hobbies || [],
+        profile_completed: true,
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      // Save to database
+      const { error } = await supabase
+        .from("student_profiles")
+        .upsert(profileData);
 
       if (error) throw error;
 
       toast.success("Profile created successfully!");
       resetOnboarding();
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast.error("Failed to save profile");
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-100 via-blue-100 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-2xl">
         <Card className="shadow-xl">
           <CardHeader className="space-y-3 pb-6">
             <CardTitle className="text-3xl font-bold text-center">
-              Onboarding
+              Complete Your Profile
             </CardTitle>
             <CardDescription className="text-center text-base">
-              Please provide as much information as possible, when filling out
-              the automation questions.
+              Help us match you with compatible roommates by completing your
+              profile
             </CardDescription>
 
             {/* Progress Indicator */}
@@ -150,20 +177,18 @@ export default function OnboardingPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Step Content with Sliding Animation */}
-            <div className="relative overflow-hidden min-h-80">
-              <div
-                className="transition-transform duration-300 ease-out flex"
-                style={{
-                  transform: `translateX(-${currentStep * 100}%)`,
-                }}
-              >
-                {STEPS.map((step) => (
-                  <div key={step.id} className="min-w-full shrink-0 px-1">
-                    <step.component />
-                  </div>
-                ))}
-              </div>
+            {/* Step Content - Only render current step to fix tab navigation */}
+            <div className="min-h-80">
+              {STEPS.map((step, index) => (
+                <div
+                  key={step.id}
+                  className={`${
+                    index === currentStep ? "block" : "hidden"
+                  } animate-in fade-in-50 duration-200`}
+                >
+                  <step.component />
+                </div>
+              ))}
             </div>
 
             {/* Navigation Buttons */}
@@ -171,7 +196,7 @@ export default function OnboardingPage() {
               <Button
                 variant="outline"
                 onClick={previousStep}
-                disabled={isFirstStep}
+                disabled={isFirstStep || isLoading}
                 className="gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -181,7 +206,7 @@ export default function OnboardingPage() {
               {!isLastStep ? (
                 <Button
                   onClick={nextStep}
-                  disabled={!canProceed}
+                  disabled={!canProceed || isLoading}
                   className="gap-2"
                 >
                   Next
@@ -190,10 +215,20 @@ export default function OnboardingPage() {
               ) : (
                 <Button
                   onClick={handleFinish}
-                  className="bg-green-600 hover:bg-green-700 gap-2"
+                  disabled={isLoading}
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 gap-2"
                 >
-                  <CheckCircle className="h-4 w-4" />
-                  Complete Profile
+                  {isLoading ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      Complete Profile
+                    </>
+                  )}
                 </Button>
               )}
             </div>

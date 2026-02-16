@@ -27,13 +27,7 @@ import { Loader2 } from "lucide-react";
 
 const universityInfoSchema = z.object({
   university_name: z.string().min(2, "University name is required"),
-  year_of_study: z.enum([
-    "1st_year",
-    "2nd_year",
-    "3rd_year",
-    "4th_year",
-    "graduate",
-  ]),
+  year_of_study: z.string().min(1, "Year of study is required"),
   major: z.string().min(2, "Major is required"),
 });
 
@@ -117,11 +111,11 @@ export function UniversityInfoStep() {
                     <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                   {showUniversities && universities.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white border dark:bg-sidebar  rounded-md shadow-lg max-h-60 overflow-auto p-1">
                       {universities.map((uni, idx) => (
                         <div
                           key={idx}
-                          className="px-3 py-2 hover:bg-accent cursor-pointer text-sm"
+                          className="px-3 py-2 hover:bg-accent rounded-sm cursor-pointer text-sm"
                           onClick={() => selectUniversity(uni.name)}
                         >
                           <div className="font-medium">{uni.name}</div>
@@ -197,11 +191,11 @@ export function UniversityInfoStep() {
                     }
                   />
                   {showMajors && filteredMajors.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white p-1 dark:bg-sidebar border rounded-md shadow-lg max-h-60 overflow-auto">
                       {filteredMajors.map((major, idx) => (
                         <div
                           key={idx}
-                          className="px-3 py-2 hover:bg-accent cursor-pointer text-sm"
+                          className="px-3 py-2 hover:bg-accent rounded-sm cursor-pointer text-sm"
                           onClick={() => {
                             setMajorSearchQuery(major);
                             form.setValue("major", major);

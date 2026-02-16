@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-
 import { LoginModal } from "@/components/login-modal";
+import { SignupModal } from "@/components/signup-modal";
 import Hero from "@/components/landingPage/hero";
 import About from "@/components/landingPage/about";
 import HowItWorks from "@/components/landingPage/how-it-works";
@@ -17,7 +16,8 @@ export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOnboarded, setIsOnboarded] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   useEffect(() => {
     checkAuthStatus();
@@ -31,16 +31,23 @@ export default function LandingPage() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        setIsLoggedIn(true);
+        // Check if it's a student
+        if (user.user_metadata?.user_type === "student") {
+          setIsLoggedIn(true);
 
-        const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("is_onboarded")
-          .eq("id", user.id)
-          .single();
+          // Check student profile completion
+          const { data: profile } = await supabase
+            .from("student_profiles")
+            .select("profile_completed")
+            .eq("id", user.id)
+            .single();
 
-        if (profile?.is_onboarded) {
-          setIsOnboarded(true);
+          if (profile?.profile_completed) {
+            setIsOnboarded(true);
+          }
+        } else {
+          // Not a student, sign them out
+          await supabase.auth.signOut();
         }
       }
     } catch (error) {
@@ -52,29 +59,50 @@ export default function LandingPage() {
 
   const handleSetupProfile = () => {
     if (!isLoggedIn) {
-      setLoginModalOpen(true);
+      setShowSignup(true); // Show signup for new users
     } else {
       router.push("/onboarding");
     }
   };
 
   const handleGoToDashboard = () => {
-    if (!isLoggedIn || !isOnboarded) {
-      setLoginModalOpen(true);
+    if (!isLoggedIn) {
+      setShowLogin(true);
+    } else if (!isOnboarded) {
+      router.push("/onboarding");
     } else {
       router.push("/dashboard");
     }
   };
 
   const handleLoginSuccess = () => {
-    setLoginModalOpen(false);
+    setShowLogin(false);
     checkAuthStatus();
+  };
+
+  const handleSignupSuccess = () => {
+    setShowSignup(false);
+    checkAuthStatus();
+    document
+      .getElementById("how-it-works")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Switch between modals
+  const switchToSignup = () => {
+    setShowLogin(false);
+    setShowSignup(true);
+  };
+
+  const switchToLogin = () => {
+    setShowSignup(false);
+    setShowLogin(true);
   };
 
   if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     );
   }
@@ -82,6 +110,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header isLoggedIn={isLoggedIn} isOnboarded={isOnboarded} />
+
       <main className="flex-1">
         <Hero />
         <About />
@@ -92,11 +121,21 @@ export default function LandingPage() {
           handleGoToDashboard={handleGoToDashboard}
         />
       </main>
+
       <Footer />
+
       <LoginModal
-        open={loginModalOpen}
-        onOpenChange={setLoginModalOpen}
+        open={showLogin}
+        onOpenChange={setShowLogin}
+        onSwitchToSignup={switchToSignup}
         onSuccess={handleLoginSuccess}
+      />
+
+      <SignupModal
+        open={showSignup}
+        onOpenChange={setShowSignup}
+        onSwitchToLogin={switchToLogin}
+        onSuccess={handleSignupSuccess}
       />
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LoginModal } from "@/components/login-modal";
+import { SignupModal } from "@/components/signup-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
@@ -16,10 +17,35 @@ export function Header({
   isOnboarded = false,
 }: HeaderProps) {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [signupModalOpen, setSignupModalOpen] = useState(false);
+
+  const handleNavClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.pushState(null, "", `#${id}`);
+    } else {
+      window.location.hash = id;
+    }
+  };
 
   const handleLoginSuccess = () => {
     setLoginModalOpen(false);
-    window.location.href = "/dashboard";
+  };
+
+  const handleSignupSuccess = () => {
+    setSignupModalOpen(false);
+  };
+
+  const switchToSignup = () => {
+    setLoginModalOpen(false);
+    setSignupModalOpen(true);
+  };
+
+  const switchToLogin = () => {
+    setSignupModalOpen(false);
+    setLoginModalOpen(true);
   };
 
   return (
@@ -38,18 +64,21 @@ export function Header({
           <nav className="hidden md:flex items-center gap-8">
             <a
               href="#about"
+              onClick={(e) => handleNavClick(e, "about")}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               About
             </a>
             <a
               href="#how-it-works"
+              onClick={(e) => handleNavClick(e, "how-it-works")}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               How It Works
             </a>
             <a
               href="#features"
+              onClick={(e) => handleNavClick(e, "features")}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Features
@@ -68,7 +97,7 @@ export function Header({
 
             {isLoggedIn && !isOnboarded && (
               <Link href="/onboarding">
-                <Button>Set up Profile</Button>
+                <Button>Complete Profile</Button>
               </Link>
             )}
 
@@ -81,7 +110,7 @@ export function Header({
                 >
                   Sign In
                 </Button>
-                <Button onClick={() => setLoginModalOpen(true)}>
+                <Button onClick={() => setSignupModalOpen(true)}>
                   Get Started
                 </Button>
               </>
@@ -93,7 +122,15 @@ export function Header({
       <LoginModal
         open={loginModalOpen}
         onOpenChange={setLoginModalOpen}
+        onSwitchToSignup={switchToSignup}
         onSuccess={handleLoginSuccess}
+      />
+
+      <SignupModal
+        open={signupModalOpen}
+        onOpenChange={setSignupModalOpen}
+        onSwitchToLogin={switchToLogin}
+        onSuccess={handleSignupSuccess}
       />
     </>
   );

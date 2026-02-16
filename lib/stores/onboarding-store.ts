@@ -1,28 +1,32 @@
 import { create } from "zustand";
 
-export interface OnboardingData {
+interface OnboardingData {
   // Personal Info
   full_name: string;
-  phone: string;
-  avatar_url: string;
-  gender: "male" | "female";
+  phone?: string;
+  avatar_url?: string;
+  gender: string;
 
   // University Info
   university_name: string;
-  year_of_study: "1st_year" | "2nd_year" | "3rd_year" | "4th_year" | "graduate";
+  year_of_study: string;
   major: string;
-  bio: string;
 
-  // Compatibility Preferences
-  sleep_schedule: "early_bird" | "night_owl" | "flexible";
-  cleanliness: number; // 1-5
-  noise_level: "quiet" | "moderate" | "social";
-  guests_frequency: "rarely" | "sometimes" | "often";
-  study_location: "library" | "room" | "both";
+  // Lifestyle
+  sleep_schedule: string;
+  cleanliness: number;
+  noise_level: string;
+  guests_frequency: string;
+  study_location: string;
+
+  // Preferences
   smoking: boolean;
   pets: boolean;
-  diet_preference: "no_preference" | "vegetarian" | "vegan" | "halal" | "other";
-  hobbies: string[];
+  diet_preference: string;
+
+  // About (optional)
+  bio?: string;
+  hobbies?: string[];
 }
 
 interface OnboardingStore {
@@ -34,14 +38,31 @@ interface OnboardingStore {
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
   previousStep: () => void;
-  updateData: (data: Partial<OnboardingData>) => void;
+  updateData: (newData: Partial<OnboardingData>) => void;
   resetOnboarding: () => void;
 }
 
 export const useOnboardingStore = create<OnboardingStore>((set) => ({
   currentStep: 0,
-  totalSteps: 5, // 4 steps total
-  data: {},
+  totalSteps: 5, // Personal Info, University, Lifestyle, Preferences, Bio
+  data: {
+    // Initialize with defaults
+    full_name: "",
+    phone: "",
+    gender: "",
+    university_name: "",
+    year_of_study: "",
+    major: "",
+    sleep_schedule: "flexible",
+    cleanliness: 3,
+    noise_level: "moderate",
+    guests_frequency: "sometimes",
+    study_location: "both",
+    smoking: false,
+    pets: false,
+    diet_preference: "no_preference",
+    hobbies: [],
+  },
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -60,5 +81,25 @@ export const useOnboardingStore = create<OnboardingStore>((set) => ({
       data: { ...state.data, ...newData },
     })),
 
-  resetOnboarding: () => set({ currentStep: 0, data: {} }),
+  resetOnboarding: () =>
+    set({
+      currentStep: 0,
+      data: {
+        full_name: "",
+        phone: "",
+        gender: "",
+        university_name: "",
+        year_of_study: "",
+        major: "",
+        sleep_schedule: "flexible",
+        cleanliness: 3,
+        noise_level: "moderate",
+        guests_frequency: "sometimes",
+        study_location: "both",
+        smoking: false,
+        pets: false,
+        diet_preference: "no_preference",
+        hobbies: [],
+      },
+    }),
 }));
