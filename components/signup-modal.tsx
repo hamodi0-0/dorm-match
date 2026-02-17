@@ -13,26 +13,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
-interface SignupModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSwitchToLogin?: () => void;
-  onSuccess?: () => void;
-}
-
-export function SignupModal({
-  open,
-  onOpenChange,
-  onSwitchToLogin,
-  onSuccess,
-}: SignupModalProps) {
+export function SignupModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const showSignup = useAuthStore((s) => s.showSignup);
+  const setShowSignup = useAuthStore((s) => s.setShowSignup);
+  const setShowLogin = useAuthStore((s) => s.setShowLogin);
+  const signupSuccess = useAuthStore((s) => s.signupSuccess);
 
   const validateEmailDomain = async (email: string): Promise<boolean> => {
     const supabase = createClient();
@@ -119,11 +112,13 @@ export function SignupModal({
         confirmPassword: "",
       });
 
-      // Close modal and call success callback
-      onOpenChange(false);
-      if (onSuccess) {
-        onSuccess();
-      }
+      // update store and close modal
+      await signupSuccess();
+
+      // keep toast visible then scroll to how-it-works for next step
+      document
+        .getElementById("how-it-works")
+        ?.scrollIntoView({ behavior: "smooth" });
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "An error occurred";
@@ -134,7 +129,7 @@ export function SignupModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={showSignup} onOpenChange={setShowSignup}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl text-center">
@@ -212,8 +207,8 @@ export function SignupModal({
             <button
               type="button"
               onClick={() => {
-                onOpenChange(false);
-                onSwitchToLogin?.();
+                setShowSignup(false);
+                setShowLogin(true);
               }}
               className="text-primary hover:underline font-medium"
               disabled={isLoading}

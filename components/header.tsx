@@ -1,27 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LoginModal } from "@/components/login-modal";
-import { SignupModal } from "@/components/signup-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
-interface HeaderProps {
-  isLoggedIn?: boolean;
-  isOnboarded?: boolean;
-  onLoginSuccess?: () => void;
-  onSignupSuccess?: () => void;
-}
+import { useAuthStore } from "@/lib/stores/auth-store";
 
-export function Header({
-  isLoggedIn = false,
-  isOnboarded = false,
-  onLoginSuccess,
-  onSignupSuccess,
-}: HeaderProps) {
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [signupModalOpen, setSignupModalOpen] = useState(false);
+export function Header() {
+  const setShowLogin = useAuthStore((s) => s.setShowLogin);
+  const setShowSignup = useAuthStore((s) => s.setShowSignup);
+  const handleSetupProfile = useAuthStore((s) => s.handleSetupProfile);
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const isOnboarded = useAuthStore((s) => s.isOnboarded);
 
   const handleNavClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -32,26 +22,6 @@ export function Header({
     } else {
       window.location.hash = id;
     }
-  };
-
-  const handleLoginSuccess = () => {
-    setLoginModalOpen(false);
-    onLoginSuccess?.();
-  };
-
-  const handleSignupSuccess = () => {
-    setSignupModalOpen(false);
-    onSignupSuccess?.();
-  };
-
-  const switchToSignup = () => {
-    setLoginModalOpen(false);
-    setSignupModalOpen(true);
-  };
-
-  const switchToLogin = () => {
-    setSignupModalOpen(false);
-    setLoginModalOpen(true);
   };
 
   return (
@@ -97,49 +67,29 @@ export function Header({
           <div className="flex items-center gap-3">
             <ThemeToggle />
 
-            {isLoggedIn && isOnboarded && (
-              <Link href="/dashboard">
-                <Button>Dashboard</Button>
-              </Link>
-            )}
-
             {isLoggedIn && !isOnboarded && (
-              <Link href="/onboarding">
-                <Button>Complete Profile</Button>
-              </Link>
+              <Button
+                variant="default"
+                onClick={() => handleSetupProfile(isLoggedIn)}
+              >
+                Complete Profile
+              </Button>
             )}
-
             {!isLoggedIn && (
               <>
                 <Button
                   variant="ghost"
-                  onClick={() => setLoginModalOpen(true)}
+                  onClick={() => setShowLogin(true)}
                   className="hidden sm:inline-flex"
                 >
                   Sign In
                 </Button>
-                <Button onClick={() => setSignupModalOpen(true)}>
-                  Get Started
-                </Button>
+                <Button onClick={() => setShowSignup(true)}>Get Started</Button>
               </>
             )}
           </div>
         </div>
       </header>
-
-      <LoginModal
-        open={loginModalOpen}
-        onOpenChange={setLoginModalOpen}
-        onSwitchToSignup={switchToSignup}
-        onSuccess={handleLoginSuccess}
-      />
-
-      <SignupModal
-        open={signupModalOpen}
-        onOpenChange={setSignupModalOpen}
-        onSwitchToLogin={switchToLogin}
-        onSuccess={handleSignupSuccess}
-      />
     </>
   );
 }

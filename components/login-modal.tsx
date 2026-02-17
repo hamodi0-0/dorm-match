@@ -14,24 +14,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
-interface LoginModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSwitchToSignup?: () => void;
-  onSuccess?: () => void;
-}
-
-export function LoginModal({
-  open,
-  onOpenChange,
-  onSwitchToSignup,
-  onSuccess,
-}: LoginModalProps) {
+export function LoginModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+
+  const showLogin = useAuthStore((s) => s.showLogin);
+  const setShowLogin = useAuthStore((s) => s.setShowLogin);
+  const setShowSignup = useAuthStore((s) => s.setShowSignup);
+  const loginSuccess = useAuthStore((s) => s.loginSuccess);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,18 +60,13 @@ export function LoginModal({
         .single();
 
       toast.success("Welcome back!");
-      onOpenChange(false);
-
-      // Call success callback if provided
-      if (onSuccess) {
-        onSuccess();
-      }
+      // update store and close modal
+      await loginSuccess();
 
       // Redirect based on profile completion
       if (profile?.profile_completed) {
         router.push("/dashboard");
       } else {
-        //instead of going to to onboarding immediately, just let the window scroll to the howitworks section, where there will be a "Get Started" button that leads to onboarding
         document
           .getElementById("how-it-works")
           ?.scrollIntoView({ behavior: "smooth" });
@@ -92,7 +81,7 @@ export function LoginModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={showLogin} onOpenChange={setShowLogin}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl text-center">
@@ -146,8 +135,8 @@ export function LoginModal({
             <button
               type="button"
               onClick={() => {
-                onOpenChange(false);
-                onSwitchToSignup?.();
+                setShowLogin(false);
+                setShowSignup(true);
               }}
               className="text-primary hover:underline font-medium"
               disabled={isLoading}
