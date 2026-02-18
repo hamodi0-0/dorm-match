@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
+import { redirect } from "next/navigation";
 type AuthState = {
   isLoggedIn: boolean;
   isOnboarded: boolean;
@@ -76,7 +77,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!isLoggedIn) {
       get().setShowSignup(true);
     } else {
-      window.location.href = "/onboarding";
+      redirect("/onboarding");
     }
   },
 }));
