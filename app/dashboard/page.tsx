@@ -1,27 +1,30 @@
-// app/dashboard/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "@/components/logout-button";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DashboardHomeClient } from "@/components/dashboard/dashboard-home-client";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/"); // Not logged in
-  }
+  if (!user) redirect("/");
+  if (user.user_metadata?.user_type !== "student") redirect("/");
 
-  if (user.user_metadata?.user_type !== "student") {
-    redirect("/"); // Not a student
-  }
+  const { data: profile } = await supabase
+    .from("student_profiles")
+    .select("full_name, university_name, major, year_of_study, avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.full_name) redirect("/onboarding");
 
   return (
-    <div>
-      <h1>Welcome, {user.user_metadata?.full_name}!</h1>
-      <p>Email: {user.email}</p>
-      <LogoutButton />
-    </div>
+    <>
+      <DashboardHeader title="Home" />
+      <DashboardHomeClient profile={profile} />
+    </>
   );
 }

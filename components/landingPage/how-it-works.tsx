@@ -1,18 +1,27 @@
+"use client";
+
 import { CheckCircle2, FileEdit, Home, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
-export default function HowItWorks({
-  isLoggedIn,
-  isOnboarded,
-  handleSetupProfile,
-  handleGoToDashboard,
-}: {
-  isLoggedIn: boolean;
-  isOnboarded: boolean;
-  handleSetupProfile: () => void;
-  handleGoToDashboard: () => void;
-}) {
+export default function HowItWorks() {
+  const router = useRouter();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const isOnboarded = useAuthStore((s) => s.isOnboarded);
+  const setShowLogin = useAuthStore((s) => s.setShowLogin);
+  const handleSetupProfile = useAuthStore((s) => s.handleSetupProfile);
+
+  const handleGoToDashboard = () => {
+    if (!isLoggedIn) {
+      setShowLogin(true);
+    } else if (!isOnboarded) {
+      router.push("/onboarding");
+    } else {
+      router.push("/dashboard");
+    }
+  };
   return (
     <section id="how-it-works" className="py-24 bg-muted/30">
       <div className="max-w-4xl mx-auto px-6">
@@ -73,14 +82,17 @@ export default function HowItWorks({
                     your perfect match.
                   </p>
                   {isLoggedIn && !isOnboarded ? (
-                    <Button size="lg" onClick={handleSetupProfile}>
+                    <Button
+                      size="lg"
+                      onClick={() => handleSetupProfile(isLoggedIn)}
+                    >
                       Set Up My Profile
                     </Button>
                   ) : !isLoggedIn ? (
                     <Button
                       size="lg"
                       variant="default"
-                      onClick={handleSetupProfile}
+                      onClick={() => setShowLogin(true)}
                     >
                       Sign In to Continue
                     </Button>
