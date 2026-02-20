@@ -32,7 +32,7 @@ interface EditableFieldProps {
   displayValue: string;
   /** Raw value used to seed the edit control */
   currentValue: string | boolean;
-  config: FieldConfig;
+  config?: FieldConfig;
   onSave: (value: string | boolean) => void;
   isSaving?: boolean;
 }
@@ -43,7 +43,7 @@ export function EditableField({
   label,
   displayValue,
   currentValue,
-  config,
+  config = { kind: "text" } as FieldConfig,
   onSave,
   isSaving = false,
 }: EditableFieldProps) {
@@ -67,8 +67,8 @@ export function EditableField({
   };
 
   return (
-    <div className="flex items-start gap-4 py-3 border-b border-border/50 last:border-0 min-h-[44px]">
-      <span className="text-xs text-muted-foreground shrink-0 w-32 pt-1">
+    <div className="flex items-start gap-4 py-3 border-b border-border/50 last:border-0 min-h-[52px]">
+      <span className="text-sm text-muted-foreground shrink-0 w-36 pt-1">
         {label}
       </span>
 
@@ -80,7 +80,7 @@ export function EditableField({
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={config.placeholder}
-                className="h-7 text-xs"
+                className="h-8 text-sm"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") commit();
@@ -94,7 +94,7 @@ export function EditableField({
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={config.placeholder}
-                className="text-xs min-h-24 resize-none"
+                className="text-sm min-h-24 resize-none"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Escape") cancel();
@@ -104,7 +104,7 @@ export function EditableField({
 
             {config.kind === "select" && (
               <Select value={draft} onValueChange={setDraft}>
-                <SelectTrigger className="h-7 text-xs w-full">
+                <SelectTrigger className="h-8 text-sm w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -123,14 +123,14 @@ export function EditableField({
 
             {config.kind === "boolean" && (
               <Select value={draft} onValueChange={setDraft}>
-                <SelectTrigger className="h-7 text-xs w-full">
+                <SelectTrigger className="h-8 text-sm w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="false" className="text-xs">
+                  <SelectItem value="false" className="text-sm">
                     {config.falseLabel ?? "No"}
                   </SelectItem>
-                  <SelectItem value="true" className="text-xs">
+                  <SelectItem value="true" className="text-sm">
                     {config.trueLabel ?? "Yes"}
                   </SelectItem>
                 </SelectContent>
@@ -149,9 +149,9 @@ export function EditableField({
               className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/40"
             >
               {isSaving ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Check className="h-3 w-3" />
+                <Check className="h-3.5 w-3.5" />
               )}
             </Button>
             <Button
@@ -163,7 +163,7 @@ export function EditableField({
               aria-label="Cancel"
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -176,13 +176,13 @@ export function EditableField({
         >
           <span
             className={cn(
-              "text-xs font-medium flex-1 text-right",
+              "text-sm font-medium flex-1 text-right",
               !displayValue && "text-muted-foreground italic",
             )}
           >
             {displayValue || "Not set"}
           </span>
-          <Pencil className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0 opacity-0 transition-opacity group-hover/value:opacity-100" />
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0 opacity-0 transition-opacity group-hover/value:opacity-100" />
         </button>
       )}
     </div>
