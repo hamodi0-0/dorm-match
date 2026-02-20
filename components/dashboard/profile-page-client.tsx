@@ -5,8 +5,8 @@ import {
   GraduationCap,
   Moon,
   Sparkles,
-  Pencil,
   MapPin,
+  ImagePlus,
 } from "lucide-react";
 import {
   Card,
@@ -17,16 +17,17 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   useStudentProfile,
   type StudentProfile,
 } from "@/hooks/use-student-profile";
+import { useUpdateProfileMutation } from "@/hooks/use-update-profile-mutation";
+import { type ProfileUpdate } from "@/lib/schemas/profile-edit-schema";
+import { EditableField } from "@/components/dashboard/editable-field";
+import { EditableHobbies } from "@/components/dashboard/editable-hobbies";
 
-interface ProfilePageClientProps {
-  initialProfile: StudentProfile;
-  userEmail: string;
-}
+// ─── Label maps ─────────────────────────────────────────────────────────────
 
 const YEAR_LABELS: Record<string, string> = {
   "1st_year": "1st Year",
@@ -36,89 +37,138 @@ const YEAR_LABELS: Record<string, string> = {
   graduate: "Graduate Student",
 };
 
-const SLEEP_LABELS: Record<string, string> = {
-  early_bird: "Early Bird",
-  night_owl: "Night Owl",
-  flexible: "Flexible",
-};
+const SLEEP_OPTIONS = [
+  { value: "early_bird", label: "Early Bird (before 10 PM)" },
+  { value: "night_owl", label: "Night Owl (after 12 AM)" },
+  { value: "flexible", label: "Flexible" },
+];
 
-const NOISE_LABELS: Record<string, string> = {
-  quiet: "Quiet",
-  moderate: "Moderate",
-  social: "Social",
-};
+const NOISE_OPTIONS = [
+  { value: "quiet", label: "Quiet" },
+  { value: "moderate", label: "Moderate" },
+  { value: "social", label: "Social" },
+];
 
-const GUEST_LABELS: Record<string, string> = {
-  rarely: "Rarely",
-  sometimes: "Sometimes",
-  often: "Often",
-};
+const GUEST_OPTIONS = [
+  { value: "rarely", label: "Rarely" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "often", label: "Often" },
+];
 
-const STUDY_LABELS: Record<string, string> = {
-  library: "Library",
-  room: "In My Room",
-  both: "Both",
-};
+const STUDY_OPTIONS = [
+  { value: "library", label: "Library" },
+  { value: "room", label: "In My Room" },
+  { value: "both", label: "Both" },
+];
 
-const DIET_LABELS: Record<string, string> = {
-  no_preference: "No Preference",
-  vegetarian: "Vegetarian",
-  vegan: "Vegan",
-  halal: "Halal",
-  other: "Other",
-};
+const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+];
+
+const YEAR_OPTIONS = [
+  { value: "1st_year", label: "1st Year" },
+  { value: "2nd_year", label: "2nd Year" },
+  { value: "3rd_year", label: "3rd Year" },
+  { value: "4th_year", label: "4th Year" },
+  { value: "graduate", label: "Graduate Student" },
+];
+
+const DIET_OPTIONS = [
+  { value: "no_preference", label: "No Preference" },
+  { value: "vegetarian", label: "Vegetarian" },
+  { value: "vegan", label: "Vegan" },
+  { value: "halal", label: "Halal" },
+  { value: "other", label: "Other" },
+];
+
+const CLEANLINESS_OPTIONS = [
+  { value: "1", label: "1 — Very Messy" },
+  { value: "2", label: "2 — Somewhat Messy" },
+  { value: "3", label: "3 — Moderate" },
+  { value: "4", label: "4 — Clean" },
+  { value: "5", label: "5 — Very Clean" },
+];
+
+// ─── Props ───────────────────────────────────────────────────────────────────
+
+interface ProfilePageClientProps {
+  initialProfile: StudentProfile;
+  userEmail: string;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export function ProfilePageClient({
   initialProfile,
   userEmail,
 }: ProfilePageClientProps) {
-  // Use React Query with initialData from server (no loading state!)
   const { data: profile } = useStudentProfile(initialProfile);
+  const {
+    mutate: updateProfile,
+    isPending,
+    variables,
+  } = useUpdateProfileMutation();
 
-  const initials = profile!.full_name
+  if (!profile) return null;
+
+  // Determine which field is actively saving so we can pass isSaving per field
+  const isSaving = (field: keyof ProfileUpdate) =>
+    isPending && variables !== undefined && field in variables;
+
+  const save = (updates: ProfileUpdate) => {
+    updateProfile(updates, {
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to save changes",
+        );
+      },
+    });
+  };
+
+  const initials = profile.full_name
     .split(" ")
-    .map((n: string) => n[0])
+    .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full">
-      {/* Phase 2 Banner */}
-      <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 flex items-center gap-3">
-        <Pencil className="h-4 w-4 text-primary shrink-0" />
-        <p className="text-sm text-primary/80">
-          <span className="font-medium text-primary">
-            Profile editing coming in Phase 2!
-          </span>{" "}
-          You can view your profile below. Editing, avatar upload, and more will
-          be available soon.
-        </p>
-      </div>
+      {/* Click-to-edit hint */}
+      <p className="text-xs text-muted-foreground mb-5 flex items-center gap-1.5">
+        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
+        Click any field to edit it inline
+      </p>
 
-      {/* Profile Header Card */}
-      <Card className="mb-6 py-0">
+      {/* ── Profile Header ── */}
+      <Card className="mb-4 py-0">
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
+            {/* Avatar — upload coming next phase */}
+            <div className="relative group/avatar shrink-0">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={profile!.avatar_url ?? undefined} />
+                <AvatarImage src={profile.avatar_url ?? undefined} />
                 <AvatarFallback className="text-2xl bg-primary/10 text-primary font-medium font-serif">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center">
-                <Pencil className="h-3 w-3 text-primary" />
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-not-allowed">
+                <ImagePlus className="h-5 w-5 text-white" />
               </div>
+              <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-muted-foreground opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                Upload coming soon
+              </p>
             </div>
+
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-serif font-medium text-foreground">
-                {profile!.full_name}
+                {profile.full_name}
               </h2>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{profile!.university_name}</span>
+                  <span className="truncate">{profile.university_name}</span>
                 </div>
                 <span className="text-muted-foreground/40">·</span>
                 <span className="text-sm text-muted-foreground">
@@ -127,38 +177,100 @@ export function ProfilePageClient({
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="secondary" className="capitalize">
-                  {profile!.gender}
+                  {profile.gender}
                 </Badge>
                 <Badge variant="secondary">
-                  {YEAR_LABELS[profile!.year_of_study] ??
-                    profile!.year_of_study}
+                  {YEAR_LABELS[profile.year_of_study] ?? profile.year_of_study}
                 </Badge>
-                <Badge variant="outline">{profile!.major}</Badge>
+                <Badge variant="outline">{profile.major}</Badge>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 shrink-0"
-              disabled
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit Profile
-            </Button>
           </div>
 
-          {profile!.bio && (
-            <div className="mt-5 pt-5 border-t border-border">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {profile!.bio}
-              </p>
-            </div>
-          )}
+          {/* Personal editable fields */}
+          <div className="border-t border-border pt-1">
+            <EditableField
+              label="Full Name"
+              displayValue={profile.full_name}
+              currentValue={profile.full_name}
+              onSave={(v) => save({ full_name: String(v) })}
+              isSaving={isSaving("full_name")}
+            />
+            <EditableField
+              label="Gender"
+              displayValue={
+                profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)
+              }
+              currentValue={profile.gender}
+              config={{ kind: "select", options: GENDER_OPTIONS }}
+              onSave={(v) => save({ gender: v as "male" | "female" })}
+              isSaving={isSaving("gender")}
+            />
+            <EditableField
+              label="Phone"
+              displayValue={profile.phone ?? ""}
+              currentValue={profile.phone ?? ""}
+              onSave={(v) => save({ phone: String(v) })}
+              isSaving={isSaving("phone")}
+            />
+            <EditableField
+              label="Bio"
+              displayValue={profile.bio ?? ""}
+              currentValue={profile.bio ?? ""}
+              config={{
+                kind: "textarea",
+                placeholder: "Tell potential roommates about yourself…",
+              }}
+              onSave={(v) => save({ bio: String(v) })}
+              isSaving={isSaving("bio")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── University ── */}
+      <Card className="mb-4 py-0">
+        <CardHeader className="pb-0 pt-5 px-5">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <GraduationCap className="h-4 w-4 text-primary" />
+            University Info
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Your academic details
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-3 pb-5 px-5">
+          <EditableField
+            label="University"
+            displayValue={profile.university_name}
+            currentValue={profile.university_name}
+            onSave={(v) => save({ university_name: String(v) })}
+            isSaving={isSaving("university_name")}
+          />
+          <EditableField
+            label="Year of Study"
+            displayValue={
+              YEAR_LABELS[profile.year_of_study] ?? profile.year_of_study
+            }
+            currentValue={profile.year_of_study}
+            config={{ kind: "select", options: YEAR_OPTIONS }}
+            onSave={(v) =>
+              save({ year_of_study: v as StudentProfile["year_of_study"] })
+            }
+            isSaving={isSaving("year_of_study")}
+          />
+          <EditableField
+            label="Major"
+            displayValue={profile.major}
+            currentValue={profile.major}
+            onSave={(v) => save({ major: String(v) })}
+            isSaving={isSaving("major")}
+          />
         </CardContent>
       </Card>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
-        {/* Lifestyle Card */}
+        {/* ── Lifestyle ── */}
         <Card className="py-0">
           <CardHeader className="pb-0 pt-5 px-5">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -166,55 +278,76 @@ export function ProfilePageClient({
               Lifestyle
             </CardTitle>
             <CardDescription className="text-xs">
-              Your daily habits and preferences
+              Your daily habits
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4 pb-5 px-5 space-y-3">
-            {[
-              {
-                label: "Sleep Schedule",
-                value:
-                  SLEEP_LABELS[profile!.sleep_schedule] ??
-                  profile!.sleep_schedule,
-              },
-              {
-                label: "Cleanliness",
-                value: `${profile!.cleanliness}/5`,
-              },
-              {
-                label: "Noise Level",
-                value:
-                  NOISE_LABELS[profile!.noise_level] ?? profile!.noise_level,
-              },
-              {
-                label: "Guests",
-                value:
-                  GUEST_LABELS[profile!.guests_frequency] ??
-                  profile!.guests_frequency,
-              },
-              {
-                label: "Study Location",
-                value:
-                  STUDY_LABELS[profile!.study_location] ??
-                  profile!.study_location,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between"
-              >
-                <span className="text-xs text-muted-foreground">
-                  {item.label}
-                </span>
-                <span className="text-xs font-medium text-foreground">
-                  {item.value}
-                </span>
-              </div>
-            ))}
+          <CardContent className="pt-3 pb-5 px-5">
+            <EditableField
+              label="Sleep Schedule"
+              displayValue={
+                SLEEP_OPTIONS.find((o) => o.value === profile.sleep_schedule)
+                  ?.label ?? profile.sleep_schedule
+              }
+              currentValue={profile.sleep_schedule}
+              config={{ kind: "select", options: SLEEP_OPTIONS }}
+              onSave={(v) =>
+                save({ sleep_schedule: v as StudentProfile["sleep_schedule"] })
+              }
+              isSaving={isSaving("sleep_schedule")}
+            />
+            <EditableField
+              label="Cleanliness"
+              displayValue={`${profile.cleanliness}/5`}
+              currentValue={String(profile.cleanliness)}
+              config={{ kind: "select", options: CLEANLINESS_OPTIONS }}
+              onSave={(v) => save({ cleanliness: parseInt(String(v)) })}
+              isSaving={isSaving("cleanliness")}
+            />
+            <EditableField
+              label="Noise Level"
+              displayValue={
+                NOISE_OPTIONS.find((o) => o.value === profile.noise_level)
+                  ?.label ?? profile.noise_level
+              }
+              currentValue={profile.noise_level}
+              config={{ kind: "select", options: NOISE_OPTIONS }}
+              onSave={(v) =>
+                save({ noise_level: v as StudentProfile["noise_level"] })
+              }
+              isSaving={isSaving("noise_level")}
+            />
+            <EditableField
+              label="Guests"
+              displayValue={
+                GUEST_OPTIONS.find((o) => o.value === profile.guests_frequency)
+                  ?.label ?? profile.guests_frequency
+              }
+              currentValue={profile.guests_frequency}
+              config={{ kind: "select", options: GUEST_OPTIONS }}
+              onSave={(v) =>
+                save({
+                  guests_frequency: v as StudentProfile["guests_frequency"],
+                })
+              }
+              isSaving={isSaving("guests_frequency")}
+            />
+            <EditableField
+              label="Study Location"
+              displayValue={
+                STUDY_OPTIONS.find((o) => o.value === profile.study_location)
+                  ?.label ?? profile.study_location
+              }
+              currentValue={profile.study_location}
+              config={{ kind: "select", options: STUDY_OPTIONS }}
+              onSave={(v) =>
+                save({ study_location: v as StudentProfile["study_location"] })
+              }
+              isSaving={isSaving("study_location")}
+            />
           </CardContent>
         </Card>
 
-        {/* Preferences Card */}
+        {/* ── Preferences ── */}
         <Card className="py-0">
           <CardHeader className="pb-0 pt-5 px-5">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -222,90 +355,61 @@ export function ProfilePageClient({
               Preferences
             </CardTitle>
             <CardDescription className="text-xs">
-              Your roommate compatibility factors
+              Roommate compatibility factors
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4 pb-5 px-5 space-y-3">
-            {[
-              {
-                label: "Smoking",
-                value: profile!.smoking ? "Yes" : "No",
-              },
-              {
-                label: "Pets",
-                value: profile!.pets ? "Yes" : "No",
-              },
-              {
-                label: "Diet",
-                value:
-                  DIET_LABELS[profile!.diet_preference] ??
-                  profile!.diet_preference,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between"
-              >
-                <span className="text-xs text-muted-foreground">
-                  {item.label}
-                </span>
-                <span className="text-xs font-medium text-foreground">
-                  {item.value}
-                </span>
-              </div>
-            ))}
+          <CardContent className="pt-3 pb-5 px-5">
+            <EditableField
+              label="Smoking"
+              displayValue={profile.smoking ? "Yes" : "No"}
+              currentValue={profile.smoking}
+              config={{ kind: "boolean" }}
+              onSave={(v) => save({ smoking: Boolean(v) })}
+              isSaving={isSaving("smoking")}
+            />
+            <EditableField
+              label="Pets"
+              displayValue={profile.pets ? "Yes" : "No"}
+              currentValue={profile.pets}
+              config={{ kind: "boolean" }}
+              onSave={(v) => save({ pets: Boolean(v) })}
+              isSaving={isSaving("pets")}
+            />
+            <EditableField
+              label="Diet"
+              displayValue={
+                DIET_OPTIONS.find((o) => o.value === profile.diet_preference)
+                  ?.label ?? profile.diet_preference
+              }
+              currentValue={profile.diet_preference}
+              config={{ kind: "select", options: DIET_OPTIONS }}
+              onSave={(v) =>
+                save({
+                  diet_preference: v as StudentProfile["diet_preference"],
+                })
+              }
+              isSaving={isSaving("diet_preference")}
+            />
           </CardContent>
         </Card>
       </div>
 
-      {/* Hobbies Card */}
-      {profile!.hobbies && profile!.hobbies.length > 0 && (
-        <Card className="py-0">
-          <CardHeader className="pb-0 pt-5 px-5">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              Hobbies &amp; Interests
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4 pb-5 px-5">
-            <div className="flex flex-wrap gap-2">
-              {profile!.hobbies.map((hobby: string) => (
-                <Badge key={hobby} variant="secondary" className="text-xs">
-                  {hobby}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* University Info */}
-      <Card className="mt-4 py-0">
+      {/* ── Hobbies ── */}
+      <Card className="py-0">
         <CardHeader className="pb-0 pt-5 px-5">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-primary" />
-            University Info
+            <Sparkles className="h-4 w-4 text-primary" />
+            Hobbies &amp; Interests
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-4 pb-5 px-5 space-y-3">
-          {[
-            { label: "University", value: profile!.university_name },
-            {
-              label: "Year",
-              value:
-                YEAR_LABELS[profile!.year_of_study] ?? profile!.year_of_study,
-            },
-            { label: "Major", value: profile!.major },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
-                {item.label}
-              </span>
-              <span className="text-xs font-medium text-foreground text-right max-w-[60%] truncate">
-                {item.value}
-              </span>
-            </div>
-          ))}
+        <CardContent className="pt-4 pb-5 px-5">
+          <EditableHobbies
+            currentHobbies={profile.hobbies ?? []}
+            onSave={(hobbies) => {
+              save({ hobbies });
+            }}
+            isSaving={isSaving("hobbies")}
+          />
         </CardContent>
       </Card>
     </main>

@@ -85,11 +85,11 @@
 }
 
 .dark {
-  --background: oklch(0.15 0.01 60);
+  --background: oklch(0.18 0.01 60);
   --foreground: oklch(0.95 0.005 60);
-  --card: oklch(0.18 0.01 60);
+  --card: oklch(0.2 0.01 60);
   --card-foreground: oklch(0.95 0.005 60);
-  --popover: oklch(0.18 0.01 60);
+  --popover: oklch(0.2 0.01 60);
   --popover-foreground: oklch(0.95 0.005 60);
   /* Brighter orange for dark mode */
   /* make the primary orange a bit less saturated */
@@ -110,7 +110,7 @@
   --chart-3: oklch(0.64 0.2 40);
   --chart-4: oklch(0.76 0.14 55);
   --chart-5: oklch(0.7 0.16 42);
-  --sidebar: oklch(0.18 0.01 60);
+  --sidebar: oklch(0.2 0.01 60);
   --sidebar-foreground: oklch(0.95 0.005 60);
   --sidebar-primary: oklch(0.68 0.18 45);
   --sidebar-primary-foreground: oklch(0.15 0.01 60);
