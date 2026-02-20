@@ -44,7 +44,7 @@ export function useUpdateProfileMutation() {
       ]);
 
       queryClient.setQueryData<StudentProfile>(["student-profile"], (old) =>
-        old ? { ...old, ...updates } : old,
+        old ? ({ ...old, ...updates } as StudentProfile) : old,
       );
 
       return { previousProfile };

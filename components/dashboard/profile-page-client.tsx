@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   User,
   GraduationCap,
@@ -25,7 +26,10 @@ import {
 import { useUpdateProfileMutation } from "@/hooks/use-update-profile-mutation";
 import { type ProfileUpdate } from "@/lib/schemas/profile-edit-schema";
 import { EditableField } from "@/components/dashboard/editable-field";
+import { EditableSearchField } from "@/components/dashboard/editable-search-field";
 import { EditableHobbies } from "@/components/dashboard/editable-hobbies";
+import { COMMON_MAJORS } from "@/lib/constants";
+import { useUniversitySearch } from "@/hooks/use-university-search";
 
 // ─── Label maps ─────────────────────────────────────────────────────────────
 
@@ -109,6 +113,9 @@ export function ProfilePageClient({
     isPending,
     variables,
   } = useUpdateProfileMutation();
+  const [universityQuery, setUniversityQuery] = useState("");
+  const { data: universities = [], isLoading: isSearchingUniversities } =
+    useUniversitySearch(universityQuery);
 
   if (!profile) return null;
 
@@ -136,7 +143,7 @@ export function ProfilePageClient({
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full">
       {/* Click-to-edit hint */}
-      <p className="text-xs text-muted-foreground mb-5 flex items-center gap-1.5">
+      <p className="text-sm text-muted-foreground mb-5 flex items-center gap-1.5">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
         Click any field to edit it inline
       </p>
@@ -240,11 +247,17 @@ export function ProfilePageClient({
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-3 pb-5 px-5">
-          <EditableField
+          <EditableSearchField
             label="University"
             displayValue={profile.university_name}
             currentValue={profile.university_name}
-            onSave={(v) => save({ university_name: String(v) })}
+            searchResults={universities.map((u) => ({
+              label: u.name,
+              sublabel: u.country,
+            }))}
+            onSearch={setUniversityQuery}
+            isSearching={isSearchingUniversities}
+            onSave={(v) => save({ university_name: v })}
             isSaving={isSaving("university_name")}
           />
           <EditableField
@@ -259,11 +272,12 @@ export function ProfilePageClient({
             }
             isSaving={isSaving("year_of_study")}
           />
-          <EditableField
+          <EditableSearchField
             label="Major"
             displayValue={profile.major}
             currentValue={profile.major}
-            onSave={(v) => save({ major: String(v) })}
+            options={COMMON_MAJORS}
+            onSave={(v) => save({ major: v })}
             isSaving={isSaving("major")}
           />
         </CardContent>
