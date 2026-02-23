@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import { redirect } from "next/navigation";
+
+export type LoginTab = "student" | "lister";
+
 type AuthState = {
   isLoggedIn: boolean;
   isOnboarded: boolean;
   isChecking: boolean;
   showLogin: boolean;
   showSignup: boolean;
+  loginTab: LoginTab;
   checkAuthStatus: () => Promise<void>;
-  setShowLogin: (open: boolean) => void;
+  setShowLogin: (open: boolean, tab?: LoginTab) => void;
   setShowSignup: (open: boolean) => void;
   loginSuccess: () => Promise<void>;
   signupSuccess: () => Promise<void>;
@@ -21,6 +25,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isChecking: true,
   showLogin: false,
   showSignup: false,
+  loginTab: "student",
 
   checkAuthStatus: async () => {
     set({ isChecking: true });
@@ -40,11 +45,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq("id", user.id)
             .single();
 
-          if (profile?.profile_completed) {
-            set({ isOnboarded: true });
-          } else {
-            set({ isOnboarded: false });
-          }
+          set({ isOnboarded: profile?.profile_completed ?? false });
         } else {
           await supabase.auth.signOut();
           set({ isLoggedIn: false, isOnboarded: false });
@@ -60,8 +61,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  setShowLogin: (open: boolean) => set({ showLogin: open }),
-  setShowSignup: (open: boolean) => set({ showSignup: open }),
+  // Tab is optional — defaults to "student" when not specified
+  setShowLogin: (open, tab) =>
+    set({
+      showLogin: open,
+      ...(tab !== undefined && { loginTab: tab }),
+    }),
+
+  setShowSignup: (open) => set({ showSignup: open }),
 
   loginSuccess: async () => {
     set({ showLogin: false });
