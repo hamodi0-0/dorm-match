@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import type { Listing } from "@/lib/types/listing";
+import type { Listing, ListingStatus } from "@/lib/types/listing";
 import {
   ROOM_TYPE_LABELS,
   BILLING_PERIOD_SUFFIX,
@@ -58,7 +58,7 @@ export function ListerListingCard({ listing }: ListerListingCardProps) {
   const handleToggleStatus = () => {
     setIsTogglingStatus(true);
     // draft → active, active → paused, paused → active
-    const newStatus = isActive ? "paused" : "active";
+    const newStatus: ListingStatus = isActive ? "paused" : "active";
 
     updateMutation.mutate(
       {
