@@ -13,10 +13,10 @@ export const createListingSchema = z.object({
     .max(2000, "Description must be 2000 characters or less")
     .optional(),
   room_type: z.enum(["single", "shared", "studio", "entire_apartment"], {
-    required_error: "Please select a room type",
+    error: "Please select a room type",
   }),
-  price_per_month: z
-    .number({ required_error: "Price is required" })
+  price_per_month: z.coerce
+    .number({ error: "Price is required" })
     .positive("Price must be greater than 0"),
   available_from: z.string().min(1, "Please select an availability date"),
   min_stay_months: z

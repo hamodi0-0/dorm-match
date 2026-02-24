@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -146,7 +146,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
   // ─── Form ─────────────────────────────────────────────────────────────────
 
   const form = useForm<CreateListingValues>({
-    resolver: zodResolver(createListingSchema),
+    resolver: zodResolver(createListingSchema) as Resolver<CreateListingValues>,
     defaultValues: listing
       ? {
           title: listing.title,
