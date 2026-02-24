@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,7 +18,6 @@ async function fetchListerProfile(): Promise<ListerProfile> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
