@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSidebarStore } from "@/lib/stores/sidebar-store";
 
-interface DashboardHeaderProps {
+interface ListerDashboardHeaderProps {
   title?: string;
 }
 
-export function DashboardHeader({ title }: DashboardHeaderProps) {
+export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
   const toggle = useSidebarStore((state) => state.toggle);
 
   return (
@@ -25,9 +25,9 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
       </Button>
 
       {title && (
-        <p className="text-base font-semibold text-muted-foreground truncate">
+        <h1 className="text-base font-semibold text-foreground truncate">
           {title}
-        </p>
+        </h1>
       )}
 
       <div className="ml-auto flex items-center gap-2">

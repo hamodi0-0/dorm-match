@@ -79,7 +79,7 @@ export function Header() {
               <>
                 <Button
                   variant="ghost"
-                  onClick={() => setShowLogin(true)}
+                  onClick={() => setShowLogin(true, "student")}
                   className="hidden sm:inline-flex"
                 >
                   Sign In
