@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Search,
   SlidersHorizontal,
@@ -198,7 +199,7 @@ export function DashboardHomeClient({
             </div>
             <div className="flex gap-2 shrink-0">
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="h-10 w-auto min-w-[130px]">
+                <SelectTrigger className="h-10 w-auto min-w-32.5">
                   <SlidersHorizontal className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                   <SelectValue placeholder="Room Type" />
                 </SelectTrigger>
@@ -216,7 +217,7 @@ export function DashboardHomeClient({
                 value={sortBy}
                 onValueChange={(v) => setSortBy(v as SortKey)}
               >
-                <SelectTrigger className="h-10 w-auto min-w-[130px]">
+                <SelectTrigger className="h-10 w-auto min-w-32.5">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -307,100 +308,103 @@ function ListingCard({ listing }: { listing: Listing }) {
   const priceSuffix = BILLING_PERIOD_SUFFIX[listing.billing_period] ?? "/mo";
 
   return (
-    <Card
-      className={cn(
-        "group cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 py-0 gap-0 overflow-hidden",
-      )}
-    >
-      {/* Image */}
-      <div className="relative h-40 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
-        {coverUrl ? (
-          <Image
-            src={coverUrl}
-            alt={listing.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Home className="h-12 w-12 text-muted-foreground/20" />
-          </div>
+    <Link href={`/dashboard/listings/${listing.id}`} className="block group">
+      <Card
+        className={cn(
+          "cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 py-0 gap-0 overflow-hidden",
         )}
-
-        {/* Room type badge */}
-        <div className="absolute top-3 left-3">
-          <Badge
-            variant="secondary"
-            className="text-xs bg-background/90 text-foreground"
-          >
-            {ROOM_TYPE_LABELS[listing.room_type]}
-          </Badge>
-        </div>
-      </div>
-
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Name & Location */}
-          <div>
-            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
-              {listing.title}
-            </h3>
-            <div className="flex items-center gap-1 mt-1">
-              <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-              <span className="text-xs text-muted-foreground truncate">
-                {listing.city}
-                {listing.country !== "United Kingdom"
-                  ? `, ${listing.country}`
-                  : ""}
-              </span>
-            </div>
-          </div>
-
-          {/* Price & availability */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-foreground">
-              £{listing.price_per_month.toLocaleString()}
-              <span className="text-xs font-normal text-muted-foreground">
-                {priceSuffix}
-              </span>
-            </span>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              <span>From {availableDate}</span>
-            </div>
-          </div>
-
-          {/* Amenities */}
-          {amenities.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {amenities.slice(0, 3).map((amenity) => (
-                <span
-                  key={amenity}
-                  className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
-                >
-                  {amenity}
-                </span>
-              ))}
-              {amenities.length > 3 && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                  +{amenities.length - 3}
-                </span>
-              )}
+      >
+        {/* Image */}
+        <div className="relative h-40 bg-linear-to-br from-muted to-muted/50 overflow-hidden">
+          {coverUrl ? (
+            <Image
+              src={coverUrl}
+              alt={listing.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Home className="h-12 w-12 text-muted-foreground/20" />
             </div>
           )}
 
-          {/* CTA */}
-          <Button
-            variant="default"
-            size="sm"
-            className="w-full h-8 text-xs gap-1.5 group/btn"
-          >
-            View Details
-            <ArrowRight className="h-3 w-3 transition-transform group-hover/btn:translate-x-0.5" />
-          </Button>
+          {/* Room type badge */}
+          <div className="absolute top-3 left-3">
+            <Badge
+              variant="secondary"
+              className="text-xs bg-background/90 text-foreground"
+            >
+              {ROOM_TYPE_LABELS[listing.room_type]}
+            </Badge>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            {/* Name & Location */}
+            <div>
+              <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                {listing.title}
+              </h3>
+              <div className="flex items-center gap-1 mt-1">
+                <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground truncate">
+                  {listing.city}
+                  {listing.country !== "United Kingdom"
+                    ? `, ${listing.country}`
+                    : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Price & availability */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">
+                £{listing.price_per_month.toLocaleString()}
+                <span className="text-xs font-normal text-muted-foreground">
+                  {priceSuffix}
+                </span>
+              </span>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>From {availableDate}</span>
+              </div>
+            </div>
+
+            {/* Amenities */}
+            {amenities.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {amenities.slice(0, 3).map((amenity) => (
+                  <span
+                    key={amenity}
+                    className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+                {amenities.length > 3 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    +{amenities.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* CTA */}
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full h-8 text-xs gap-1.5 group/btn pointer-events-none"
+              tabIndex={-1}
+            >
+              View Details
+              <ArrowRight className="h-3 w-3 transition-transform group-hover/btn:translate-x-0.5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
