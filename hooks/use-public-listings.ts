@@ -70,6 +70,8 @@ export function usePublicListings(
     queryKey: ["public-listings", filters],
     queryFn: () => fetchPublicListings(filters),
     initialData: Object.keys(filters).length === 0 ? initialData : undefined,
-    staleTime: 60 * 1000, // 1 min
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true, // override the global false
+    refetchInterval: 60 * 1000, // poll every 60s while tab is open
   });
 }

@@ -387,7 +387,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Describe the room, house rules, what's nearby…"
-                      className="min-h-[100px] resize-none"
+                      className="min-h-25 resize-none"
                       {...field}
                     />
                   </FormControl>
