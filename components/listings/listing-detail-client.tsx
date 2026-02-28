@@ -110,7 +110,7 @@ function ImageGallery({ images }: { images: ListingImage[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-2 h-64 sm:h-80 lg:h-[420px] rounded-xl overflow-hidden">
+      <div className="grid grid-cols-3 gap-2 h-64 sm:h-80 lg:h-105 rounded-xl overflow-hidden">
         <div
           className="col-span-2 relative cursor-pointer group overflow-hidden"
           onClick={() => {

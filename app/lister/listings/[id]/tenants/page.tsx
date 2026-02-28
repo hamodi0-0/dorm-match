@@ -5,7 +5,6 @@ import { NoTenantsPrompt } from "@/components/tenants/no-tenants-prompt";
 import { ConfirmedTenantRow } from "@/components/tenants/confirmed-tenant-row";
 import { PendingRequestCard } from "@/components/tenants/pending-request-card";
 import { TenantCountBadge } from "@/components/tenants/tenant-count-badge";
-import { EditContactPhoneForm } from "@/components/tenants/edit-contact-phone-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Clock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -112,7 +111,6 @@ export default async function ListerTenantsPage({ params }: PageProps) {
             Back to listing
           </Link>
         </Button>
-
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
@@ -128,34 +126,13 @@ export default async function ListerTenantsPage({ params }: PageProps) {
             maxOccupants={listing.max_occupants}
           />
         </div>
-
-        {/* Contact phone */}
-        <Card className="py-0">
-          <CardHeader className="pt-5 pb-0 px-5">
-            <CardTitle className="text-sm font-semibold">
-              Contact Phone for This Listing
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              Shown to confirmed tenants only. Use a number specific to this
-              property if preferred.
-            </p>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 pt-4">
-            <EditContactPhoneForm
-              listingId={listing.id}
-              currentPhone={listing.contact_phone ?? ""}
-            />
-          </CardContent>
-        </Card>
-
         {/* No tenants prompt */}
         {tenants.length === 0 && <NoTenantsPrompt variant="lister" />}
-
         {/* Confirmed tenants */}
         {tenants.length > 0 && (
           <Card className="py-0">
             <CardHeader className="pt-5 pb-0 px-5">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold7 flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 Confirmed Tenants
                 <span className="text-muted-foreground font-normal">
@@ -180,7 +157,6 @@ export default async function ListerTenantsPage({ params }: PageProps) {
             </CardContent>
           </Card>
         )}
-
         {/* Pending requests */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
