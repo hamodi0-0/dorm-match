@@ -81,7 +81,7 @@ export function StudentNavHeader() {
     <>
       <header className="h-16 border-b border-border bg-background/95 backdrop-blur-sm flex items-center px-4 sm:px-6 shrink-0">
         <Link href="/dashboard" className="flex items-center shrink-0">
-          <div className=" bg-primary/90 rounded-lg h-8 w-8 flex items-center mr-2 justify-center shrink-0">
+          <div className=" bg-primary rounded-lg h-8 w-8 flex items-center mr-2 justify-center shrink-0">
             <Image
               src="/images/transparent-logo.png"
               alt="Dormr Logo"

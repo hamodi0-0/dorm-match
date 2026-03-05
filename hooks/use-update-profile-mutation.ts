@@ -23,14 +23,12 @@ const updateStudentProfile = async (
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("No data returned after update");
+
   return data as StudentProfile;
 };
 
-/**
- * User actively edits individual fields → optimistic updates so the UI
- * feels instant. On error, cache rolls back and a toast surfaces the failure.
- */
 export function useUpdateProfileMutation() {
   const queryClient = useQueryClient();
 
