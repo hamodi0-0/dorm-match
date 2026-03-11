@@ -40,8 +40,8 @@ interface ListingsGridClientProps {
 
 function CardSkeleton() {
   return (
-    <div className="rounded-xl border bg-card overflow-hidden flex h-[170px]">
-      <Skeleton className="w-[240px] shrink-0 h-full" />
+    <div className="rounded-xl border bg-card overflow-hidden flex h-42.5">
+      <Skeleton className="w-60 shrink-0 h-full" />
       <div className="flex-1 p-4 space-y-3">
         <Skeleton className="h-3 w-1/4" />
         <Skeleton className="h-5 w-2/5" />
@@ -232,7 +232,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                 })
               }
             >
-              <SelectTrigger className="h-10 text-sm w-auto min-w-[140px] shrink-0">
+              <SelectTrigger className="h-10 text-sm w-auto min-w-35 shrink-0">
                 <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-muted-foreground shrink-0" />
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
@@ -253,7 +253,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                 handleFilterChange({ maxPrice: v === "any" ? null : Number(v) })
               }
             >
-              <SelectTrigger className="h-10 text-sm w-auto min-w-[130px] shrink-0">
+              <SelectTrigger className="h-10 text-sm w-auto min-w-32.5 shrink-0">
                 <SelectValue placeholder="Any Price" />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +275,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                 })
               }
             >
-              <SelectTrigger className="h-10 text-sm w-auto min-w-[140px] shrink-0">
+              <SelectTrigger className="h-10 text-sm w-auto min-w-35 shrink-0">
                 <SelectValue placeholder="Any Preference" />
               </SelectTrigger>
               <SelectContent>
@@ -344,7 +344,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                   })
                 }
               >
-                <SelectTrigger className="h-8 text-xs w-auto min-w-[110px]">
+                <SelectTrigger className="h-8 text-xs w-auto min-w-27.5">
                   <SlidersHorizontal className="h-3 w-3 mr-1 text-muted-foreground shrink-0" />
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
@@ -365,7 +365,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                   })
                 }
               >
-                <SelectTrigger className="h-8 text-xs w-auto min-w-[100px]">
+                <SelectTrigger className="h-8 text-xs w-auto min-w-25">
                   <SelectValue placeholder="Price" />
                 </SelectTrigger>
                 <SelectContent>
@@ -387,7 +387,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
                   })
                 }
               >
-                <SelectTrigger className="h-8 text-xs w-auto min-w-[100px]">
+                <SelectTrigger className="h-8 text-xs w-auto min-w-25">
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
