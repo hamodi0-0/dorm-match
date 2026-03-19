@@ -83,6 +83,13 @@ export async function updateSession(request: NextRequest) {
         url.pathname = "/dashboard";
         return NextResponse.redirect(url);
       }
+
+      // If student opens landing page while logged in, route to app immediately
+      if (pathname === "/") {
+        const url = request.nextUrl.clone();
+        url.pathname = isOnboarded ? "/dashboard" : "/onboarding";
+        return NextResponse.redirect(url);
+      }
     }
 
     // ============================================
@@ -119,6 +126,13 @@ export async function updateSession(request: NextRequest) {
       if (hasProfile && pathname.startsWith("/lister/onboarding")) {
         const url = request.nextUrl.clone();
         url.pathname = "/lister/dashboard";
+        return NextResponse.redirect(url);
+      }
+
+      // If lister opens landing page while logged in, route to app immediately
+      if (pathname === "/") {
+        const url = request.nextUrl.clone();
+        url.pathname = hasProfile ? "/lister/dashboard" : "/lister/onboarding";
         return NextResponse.redirect(url);
       }
     }
