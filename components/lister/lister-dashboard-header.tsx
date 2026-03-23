@@ -377,17 +377,6 @@ export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
               )}
             </Button>
           </form>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setSwitchDialogOpen(false)}
-              disabled={isSwitchingToStudent}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

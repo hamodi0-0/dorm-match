@@ -1,4 +1,4 @@
-import { BeatLoader, RotateLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 import { cn } from "@/lib/utils";
 
 type PageLoaderProps = {
