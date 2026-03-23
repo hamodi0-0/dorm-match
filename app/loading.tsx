@@ -8,7 +8,7 @@ export default function RootLoading() {
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary/10 p-1.5">
             <Image
-              src="/images/rounded-logo.png"
+              src="/images/transparent-logo.png"
               alt="Dormr Logo"
               width={40}
               height={40}
