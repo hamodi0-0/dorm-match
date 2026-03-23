@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -21,8 +21,9 @@ import {
 import { toast } from "sonner";
 
 import {
-  createListingSchema,
   type CreateListingValues,
+  listingFormSchema,
+  type ListingFormValues,
 } from "@/lib/schemas/listing-schema";
 import { geocodeAddress, reverseGeocodeCoords } from "@/lib/geocoding";
 import { useCreateListingMutation } from "@/hooks/use-create-listing-mutation";
@@ -194,14 +195,15 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
   const [geocodeStatus, setGeocodeStatus] = useState<
     "idle" | "success" | "failed"
   >("idle");
+  const totalImageCount = existingImages.length + pendingImages.length;
 
   const isSubmitting =
     createMutation.isPending || updateMutation.isPending || isUploadingImages;
 
   // ─── Form ─────────────────────────────────────────────────────────────────
 
-  const form = useForm<CreateListingValues>({
-    resolver: zodResolver(createListingSchema) as Resolver<CreateListingValues>,
+  const form = useForm<ListingFormValues>({
+    resolver: zodResolver(listingFormSchema) as Resolver<ListingFormValues>,
     defaultValues: listing
       ? {
           title: listing.title,
@@ -227,6 +229,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
           furnished: listing.furnished,
           latitude: listing.latitude ?? undefined,
           longitude: listing.longitude ?? undefined,
+          image_count: listing.listing_images?.length ?? 0,
         }
       : {
           title: "",
@@ -241,7 +244,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
           city: "",
           contact_phone: "",
           postcode: "",
-          country: "United Kingdom",
+          country: "Egypt",
           gender_preference: "no_preference",
           university_name: "",
           wifi: false,
@@ -250,8 +253,16 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
           gym: false,
           bills_included: false,
           furnished: true,
+          image_count: 0,
         },
   });
+
+  useEffect(() => {
+    form.setValue("image_count", totalImageCount);
+    if (totalImageCount >= 3) {
+      form.clearErrors("image_count");
+    }
+  }, [form, totalImageCount]);
 
   // Watch lat/lng so the map reacts to geocoding results
   const latitude = form.watch("latitude");
@@ -405,29 +416,43 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
 
   // ─── Submit ───────────────────────────────────────────────────────────────
 
-  const onSubmit = async (values: CreateListingValues) => {
+  const onSubmit = async (values: ListingFormValues) => {
+    const { image_count, ...listingValues } = values;
+
+    if (image_count < 3) {
+      form.setError("image_count", {
+        type: "manual",
+        message: "You must upload atleast 3 images",
+      });
+      return;
+    }
+
     // Geocode silently on submit if no coords yet
-    if (!values.latitude || !values.longitude) {
+    if (!listingValues.latitude || !listingValues.longitude) {
       try {
-        const query = [values.address_line, values.city, values.postcode]
+        const query = [
+          listingValues.address_line,
+          listingValues.city,
+          listingValues.postcode,
+        ]
           .filter(Boolean)
           .join(", ");
         const coords = await geocodeAddress(query);
         if (coords) {
-          values.latitude = coords.lat;
-          values.longitude = coords.lng;
+          listingValues.latitude = coords.lat;
+          listingValues.longitude = coords.lng;
         }
       } catch {
         // intentionally swallowed
       }
     }
 
-    const normalised = {
-      ...values,
-      description: values.description || undefined,
-      contact_phone: values.contact_phone.trim(),
-      university_name: values.university_name || undefined,
-      postcode: values.postcode || undefined,
+    const normalised: CreateListingValues = {
+      ...listingValues,
+      description: listingValues.description || undefined,
+      contact_phone: listingValues.contact_phone.trim(),
+      university_name: listingValues.university_name || undefined,
+      postcode: listingValues.postcode || undefined,
     };
 
     if (mode === "create") {
@@ -1130,6 +1155,12 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ImageIcon className="h-3.5 w-3.5 shrink-0" />
                 The first photo you upload will be used as the cover image.
+              </p>
+            )}
+
+            {form.formState.errors.image_count?.message && (
+              <p className="text-sm font-medium text-destructive">
+                {form.formState.errors.image_count.message}
               </p>
             )}
           </CardContent>

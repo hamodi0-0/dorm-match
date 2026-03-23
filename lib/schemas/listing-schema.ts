@@ -66,4 +66,9 @@ export const createListingSchema = z.object({
   furnished: z.boolean().default(false),
 });
 
+export const listingFormSchema = createListingSchema.extend({
+  image_count: z.number().int().min(3, "You must upload atleast 3 images"),
+});
+
 export type CreateListingValues = z.infer<typeof createListingSchema>;
+export type ListingFormValues = z.infer<typeof listingFormSchema>;
