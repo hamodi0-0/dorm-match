@@ -38,7 +38,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -427,17 +426,6 @@ export function StudentNavHeader() {
             )}
             {isSwitchingToLister ? "Redirecting…" : "Continue with Google"}
           </Button>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setSwitchDialogOpen(false)}
-              disabled={isSwitchingToLister}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
