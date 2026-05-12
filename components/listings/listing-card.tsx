@@ -31,6 +31,7 @@ import { ROOM_TYPE_LABELS, BILLING_PERIOD_SUFFIX } from "@/lib/types/listing";
 import type { ListingImage } from "@/lib/types/listing";
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
 import { useCompatibility } from "@/hooks/use-compatibility";
+import { useInitChat } from "@/hooks/use-init-chat";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 
 interface ListingCardProps {
@@ -196,6 +197,7 @@ export function ListingCard({
     viewerProfile ?? null,
     tenantProfiles ?? [],
   );
+  const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -303,20 +305,23 @@ export function ListingCard({
               <TooltipContent>Contact coming soon</TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 gap-1.5 text-xs"
-                  disabled
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Chat</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Contact coming soon</TooltipContent>
-            </Tooltip>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              disabled={isInitChatPending}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                initChat({
+                  listerId: listing.lister_id,
+                  listingId: listing.id,
+                });
+              }}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Chat</span>
+            </Button>
 
             <Tooltip>
               <TooltipTrigger asChild>

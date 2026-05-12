@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { Conversation, Message } from "@/lib/types/chat";
 
@@ -18,8 +19,6 @@ async function fetchConversations(): Promise<Conversation[]> {
     .select(
       `
       *,
-      student:student_profiles!student_id(full_name, avatar_url),
-      lister:lister_profiles!lister_id(full_name, avatar_url),
       listing:listings(title)
     `,
     )
@@ -31,18 +30,32 @@ async function fetchConversations(): Promise<Conversation[]> {
     return [];
   }
 
-  // To properly get unread counts and last message, we need to query messages
-  // We'll batch this by grabbing the conversation IDs
   const conversationIds = conversationsData.map((c) => c.id);
-
   if (conversationIds.length === 0) return [];
 
-  // Fetch all messages for these conversations to calculate unread counts and last message
-  const { data: messagesData, error: messagesError } = await supabase
-    .from("messages")
-    .select("*")
-    .in("conversation_id", conversationIds)
-    .order("created_at", { ascending: false });
+  const studentIds = [...new Set(conversationsData.map((c) => c.student_id))];
+  const listerIds = [...new Set(conversationsData.map((c) => c.lister_id))];
+
+  // Batch fetch profiles due to auth.users FK join quirks
+  const [
+    { data: studentProfilesData },
+    { data: listerProfilesData },
+    { data: messagesData, error: messagesError },
+  ] = await Promise.all([
+    supabase
+      .from("student_profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", studentIds),
+    supabase
+      .from("lister_profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", listerIds),
+    supabase
+      .from("messages")
+      .select("*")
+      .in("conversation_id", conversationIds)
+      .order("created_at", { ascending: false }),
+  ]);
 
   if (messagesError) {
     console.error("Error fetching messages for conversations:", messagesError);
@@ -50,13 +63,20 @@ async function fetchConversations(): Promise<Conversation[]> {
 
   const messages = (messagesData as Message[]) || [];
 
-  // Attach last_message and unread_count
+  // Create lookup maps
+  const studentMap = new Map((studentProfilesData || []).map((p) => [p.id, p]));
+  const listerMap = new Map((listerProfilesData || []).map((p) => [p.id, p]));
+
+  // Attach last_message, unread_count, and mapped profiles
   const enrichedConversations = conversationsData.map((conv) => {
-    // Array properties workaround for Supabase joins (sometimes returned as arrays)
-    const student = Array.isArray(conv.student)
-      ? conv.student[0]
-      : conv.student;
-    const lister = Array.isArray(conv.lister) ? conv.lister[0] : conv.lister;
+    const student = studentMap.get(conv.student_id) || {
+      full_name: "Unknown Student",
+      avatar_url: null,
+    };
+    const lister = listerMap.get(conv.lister_id) || {
+      full_name: "Unknown Lister",
+      avatar_url: null,
+    };
     const listing = Array.isArray(conv.listing)
       ? conv.listing[0]
       : conv.listing;
@@ -82,10 +102,58 @@ async function fetchConversations(): Promise<Conversation[]> {
 }
 
 export function useConversations(initialData?: Conversation[]) {
-  return useQuery<Conversation[]>({
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  const query = useQuery<Conversation[]>({
     queryKey: ["conversations"],
     queryFn: fetchConversations,
     initialData,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 0, // Always refetch to ensure we get the latest when remounting
   });
+
+  // Global realtime subscription for the sidebar
+  useEffect(() => {
+    // We subscribe to all new messages so the sidebar can update immediately when someone texts us
+    const channel = supabase
+      .channel("realtime:all-messages")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // INSERT or UPDATE
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          // Invalidate the conversations cache so the sidebar immediately updates
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+          // Also invalidate the specific conversation's messages just in case
+          // Immediately update local cache for the active chat window
+          if (payload.eventType === "INSERT" && payload.new && (payload.new as any).conversation_id) {
+            queryClient.setQueryData<Message[]>(
+              ["messages", (payload.new as any).conversation_id],
+              (old) => {
+                if (!old) return [payload.new as Message];
+                if (old.some((m) => m.id === (payload.new as any).id)) return old;
+                return [...old, payload.new as Message];
+              }
+            );
+          }
+
+          if (payload.new && (payload.new as any).conversation_id) {
+            queryClient.invalidateQueries({
+              queryKey: ["messages", (payload.new as any).conversation_id],
+            });
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, supabase]);
+
+  return query;
 }

@@ -41,6 +41,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useListerProfile } from "@/hooks/use-lister-profile";
 import { useListerPendingCount } from "@/hooks/use-notifications";
+import { useChatStore } from "@/lib/stores/chat-store";
 import Image from "next/image";
 
 interface MobileNavItem {
@@ -58,7 +59,6 @@ const MOBILE_NAV_ITEMS: MobileNavItem[] = [
     href: "/lister/chats",
     label: "Chats",
     icon: MessageSquare,
-    badge: "Soon",
   },
   { href: "/lister/settings", label: "Settings", icon: Settings },
 ];
@@ -77,6 +77,7 @@ export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
   const [studentPassword, setStudentPassword] = useState("");
   const { data: profile, isLoading } = useListerProfile();
   const pendingCount = useListerPendingCount(profile?.id ?? null);
+  const unreadChatCount = useChatStore((state) => state.globalUnreadCount);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -272,6 +273,7 @@ export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
             const active = isActive(item.href);
             const Icon = item.icon;
             const isNotifications = item.href === "/lister/notifications";
+            const isChats = item.href === "/lister/chats";
 
             return (
               <Link
@@ -300,6 +302,10 @@ export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
                   <span className="h-5 min-w-5 rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white flex items-center justify-center leading-none">
                     {pendingCount > 9 ? "9+" : pendingCount}
                   </span>
+                ) : isChats && unreadChatCount > 0 ? (
+                  <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground leading-none">
+                    {unreadChatCount}
+                  </div>
                 ) : item.badge ? (
                   <Badge
                     variant="secondary"

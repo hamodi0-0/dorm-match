@@ -56,6 +56,7 @@ import {
 import { TenantRequestButton } from "@/components/tenants/tenant-request-button";
 import { CompatibilitySection } from "@/components/compatibility/compatibility-section";
 import { useStudentProfile } from "@/hooks/use-student-profile";
+import { useInitChat } from "@/hooks/use-init-chat";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 
 interface ListingDetailClientProps {
@@ -274,6 +275,7 @@ export function ListingDetailClient({
   isViewerTenant,
 }: ListingDetailClientProps) {
   const { data: viewerProfile } = useStudentProfile();
+  const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
   const [descExpanded, setDescExpanded] = useState(false);
   const [callConfirmOpen, setCallConfirmOpen] = useState(false);
 
@@ -629,14 +631,22 @@ export function ListingDetailClient({
                     Call Lister
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  className="w-full gap-2 h-10"
-                  disabled
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Dormr Chat
-                </Button>
+                {userId !== listing.lister_id && (
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2 h-10"
+                    disabled={isInitChatPending}
+                    onClick={() =>
+                      initChat({
+                        listerId: listing.lister_id,
+                        listingId: listing.id,
+                      })
+                    }
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Dormr Chat
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-2 pt-1">

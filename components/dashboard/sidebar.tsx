@@ -3,13 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  User,
   MessageSquare,
   Heart,
   Settings,
   LogOut,
   Building2,
-  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +24,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useStudentProfile } from "@/hooks/use-student-profile";
+import { useChatStore } from "@/lib/stores/chat-store";
 
 interface NavItem {
   href: string;
@@ -40,7 +39,6 @@ const NAV_ITEMS: NavItem[] = [
     href: "/dashboard/chats",
     label: "Chats",
     icon: MessageSquare,
-    badge: "Soon",
   },
   {
     href: "/dashboard/saved",
@@ -60,10 +58,12 @@ const NAV_ITEMS: NavItem[] = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const isOpen = useSidebarStore((state) => state.isOpen);
+  const setOpen = useSidebarStore((state) => state.setOpen);
   const router = useRouter();
 
   // Use React Query - will use cached data if available
   const { data: profile, isLoading } = useStudentProfile();
+  const unreadChatCount = useChatStore((state) => state.globalUnreadCount);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -154,7 +154,13 @@ export function DashboardSidebar() {
                   {isOpen && (
                     <>
                       <span className="flex-1 truncate">{item.label}</span>
-                      {item.badge && (
+                      {item.href === "/dashboard/chats" &&
+                        unreadChatCount > 0 && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                            {unreadChatCount}
+                          </div>
+                        )}
+                      {item.badge && item.href !== "/dashboard/chats" && (
                         <Badge
                           variant="secondary"
                           className="text-xs px-1.5 py-0 h-5"
@@ -177,7 +183,13 @@ export function DashboardSidebar() {
                         className="flex items-center gap-2"
                       >
                         {item.label}
-                        {item.badge && (
+                        {item.href === "/dashboard/chats" &&
+                          unreadChatCount > 0 && (
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                              {unreadChatCount}
+                            </div>
+                          )}
+                        {item.badge && item.href !== "/dashboard/chats" && (
                           <Badge
                             variant="secondary"
                             className="text-xs px-1.5 py-0 h-5"
@@ -294,6 +306,14 @@ export function DashboardSidebar() {
           )}
         </div>
       </aside>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
     </TooltipProvider>
   );
 }

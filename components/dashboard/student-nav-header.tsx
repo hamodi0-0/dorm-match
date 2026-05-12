@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/notifications-bell";
 import { useStudentUnreadCount } from "@/hooks/use-notifications";
 import { useStudentProfile } from "@/hooks/use-student-profile";
+import { useChatStore } from "@/lib/stores/chat-store";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -99,6 +100,8 @@ export function StudentNavHeader() {
   const [switchDialogOpen, setSwitchDialogOpen] = useState(false);
   const [isSwitchingToLister, setIsSwitchingToLister] = useState(false);
   const { data: profile, isLoading } = useStudentProfile();
+
+  const unreadChatCount = useChatStore((state) => state.globalUnreadCount);
 
   // Only count notifications the student hasn't seen yet
   const unreadCount = useStudentUnreadCount(profile?.id ?? null);
@@ -200,7 +203,15 @@ export function StudentNavHeader() {
                 )}
               >
                 {item.label}
-                {item.badge && (
+                {item.href === "/dashboard/chats" && unreadChatCount > 0 && (
+                  <Badge
+                    variant="default"
+                    className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center"
+                  >
+                    {unreadChatCount}
+                  </Badge>
+                )}
+                {item.badge && item.href !== "/dashboard/chats" && (
                   <Badge
                     variant="secondary"
                     className="text-[10px] px-1.5 py-0 h-4 font-medium"
@@ -359,14 +370,33 @@ export function StudentNavHeader() {
                   )}
                 />
                 <span className="flex-1">{item.label}</span>
-                {item.badge && (
+                {item.href === "/dashboard/notifications" &&
+                  unreadCount > 0 && (
+                    <Badge
+                      variant="default"
+                      className="h-5 w-5 rounded-full p-0 flex items-center justify-center"
+                    >
+                      {unreadCount}
+                    </Badge>
+                  )}
+                {item.href === "/dashboard/chats" && unreadChatCount > 0 && (
                   <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 h-4"
+                    variant="default"
+                    className="h-5 w-5 rounded-full p-0 flex items-center justify-center"
                   >
-                    {item.badge}
+                    {unreadChatCount}
                   </Badge>
                 )}
+                {item.badge &&
+                  item.href !== "/dashboard/chats" &&
+                  item.href !== "/dashboard/notifications" && (
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] px-1.5 py-0 h-4"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
               </Link>
             );
           })}

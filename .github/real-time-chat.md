@@ -25,6 +25,10 @@ We will implement a complete real-time messaging system using Supabase websocket
 
 ### Phase 4: Global Badges & Layout Integration
 
+#### note
+
+    make sure that the UI makes sense in big and small screens, for example for small screens the badge must show in the burger menu, which when opened, will aslo show a badge on the specific tab that should have the badge
+
 1. Add real-time unread badges to `components/dashboard/sidebar.tsx` and `components/lister/lister-sidebar.tsx`.
 2. Add real-time badges to headers: `student-nav-header.tsx` and `lister-dashboard-header.tsx`.
 
