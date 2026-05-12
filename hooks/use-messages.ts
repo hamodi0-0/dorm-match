@@ -61,17 +61,17 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
               if (!old) return [newMessage];
               if (old.some((m) => m.id === newMessage.id)) return old;
               return [...old, newMessage];
-            }
+            },
           );
 
           // Still invalidate to ensure synchronization
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
 
-          queryClient.invalidateQueries({
-            queryKey: ["messages", conversationId],
-          });
-
-
+          // Disabled to prevent wiping the optimistically added message
+          // with a potentially stale background fetch response
+          // queryClient.invalidateQueries({
+          //  queryKey: ["messages", conversationId],
+          // });
 
           // If message is from someone else and this chat isn't currently open, update unread count
           const {
@@ -94,9 +94,9 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
         },
         (payload) => {
           // E.g. message getting marked as read
-          queryClient.invalidateQueries({
-            queryKey: ["messages", conversationId],
-          });
+          // queryClient.invalidateQueries({
+          //   queryKey: ["messages", conversationId],
+          // });
         },
       )
       .subscribe();

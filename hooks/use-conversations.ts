@@ -130,21 +130,27 @@ export function useConversations(initialData?: Conversation[]) {
 
           // Also invalidate the specific conversation's messages just in case
           // Immediately update local cache for the active chat window
-          if (payload.eventType === "INSERT" && payload.new && (payload.new as any).conversation_id) {
+          if (
+            payload.eventType === "INSERT" &&
+            payload.new &&
+            (payload.new as any).conversation_id
+          ) {
             queryClient.setQueryData<Message[]>(
               ["messages", (payload.new as any).conversation_id],
               (old) => {
                 if (!old) return [payload.new as Message];
-                if (old.some((m) => m.id === (payload.new as any).id)) return old;
+                if (old.some((m) => m.id === (payload.new as any).id))
+                  return old;
                 return [...old, payload.new as Message];
-              }
+              },
             );
           }
 
           if (payload.new && (payload.new as any).conversation_id) {
-            queryClient.invalidateQueries({
-              queryKey: ["messages", (payload.new as any).conversation_id],
-            });
+            // Disabled invalidation to stop React Query from fetching old cached HTTP responses
+            // queryClient.invalidateQueries({
+            //   queryKey: ["messages", (payload.new as any).conversation_id],
+            // });
           }
         },
       )
