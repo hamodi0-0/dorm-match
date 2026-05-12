@@ -1,8 +1,9 @@
-export default async function ListerChatsPage() {
-  return (
-    <div className="flex-1 p-4">
-      <h1 className="text-2xl font-bold mb-4">Chats</h1>
-      <p className="text-gray-600">This is the chats page.</p>
-    </div>
-  );
+import { ChatView } from "@/components/chats/chat-view";
+
+export const metadata = {
+  title: "Chats | Dormr",
+};
+
+export default function ListerChatsPage() {
+  return <ChatView basePath="/lister/chats" />;
 }

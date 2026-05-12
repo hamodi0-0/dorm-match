@@ -32,7 +32,9 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
     queryFn: () => fetchMessages(conversationId),
     initialData,
     enabled: !!conversationId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    // When staleTime is too high, navigating away and back causes the chat view to show
+    // cached messages without refetching, preventing new messages from showing up.
+    staleTime: 0,
   });
 
   // Set up real-time subscription for new messages
@@ -52,19 +54,24 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
         async (payload) => {
           const newMessage = payload.new as Message;
 
-          // Update the localized messages cache safely
+          // Immediately update UI cache without waiting for refetch
           queryClient.setQueryData<Message[]>(
             ["messages", conversationId],
             (old) => {
               if (!old) return [newMessage];
-              // Avoid duplicates if optimistic update already added it
               if (old.some((m) => m.id === newMessage.id)) return old;
               return [...old, newMessage];
-            },
+            }
           );
 
-          // Optionally invalidate conversations to update the "last message"
+          // Still invalidate to ensure synchronization
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+          queryClient.invalidateQueries({
+            queryKey: ["messages", conversationId],
+          });
+
+
 
           // If message is from someone else and this chat isn't currently open, update unread count
           const {
@@ -86,17 +93,10 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          const updatedMessage = payload.new as Message;
           // E.g. message getting marked as read
-          queryClient.setQueryData<Message[]>(
-            ["messages", conversationId],
-            (old) => {
-              if (!old) return [updatedMessage];
-              return old.map((m) =>
-                m.id === updatedMessage.id ? updatedMessage : m,
-              );
-            },
-          );
+          queryClient.invalidateQueries({
+            queryKey: ["messages", conversationId],
+          });
         },
       )
       .subscribe();
