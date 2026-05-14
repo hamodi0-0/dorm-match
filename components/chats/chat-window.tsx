@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useChatStore } from "@/lib/stores/chat-store";
+import { PageLoader } from "../ui/page-loader";
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -97,15 +98,11 @@ export function ChatWindow({
   ]);
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoader className="min-h-[50vh]" />;
   }
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-background relative">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-background shrink-0 z-10">
         <Button
