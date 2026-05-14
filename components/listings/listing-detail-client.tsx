@@ -33,17 +33,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -57,6 +46,7 @@ import { TenantRequestButton } from "@/components/tenants/tenant-request-button"
 import { CompatibilitySection } from "@/components/compatibility/compatibility-section";
 import { useStudentProfile } from "@/hooks/use-student-profile";
 import { useInitChat } from "@/hooks/use-init-chat";
+import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 
 interface ListingDetailClientProps {
@@ -277,7 +267,6 @@ export function ListingDetailClient({
   const { data: viewerProfile } = useStudentProfile();
   const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
   const [descExpanded, setDescExpanded] = useState(false);
-  const [callConfirmOpen, setCallConfirmOpen] = useState(false);
 
   const images = listing.listing_images ?? [];
   const priceSuffix = BILLING_PERIOD_SUFFIX[listing.billing_period] ?? "/mo";
@@ -585,43 +574,15 @@ export function ListingDetailClient({
 
               <div className="space-y-2.5">
                 {callHref ? (
-                  <AlertDialog
-                    open={callConfirmOpen}
-                    onOpenChange={setCallConfirmOpen}
+                  <CallConfirmDialog
+                    formattedPhone={formattedPhone}
+                    callHref={callHref}
                   >
-                    <AlertDialogTrigger asChild>
-                      <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10">
-                        <Phone className="h-4 w-4" />
-                        Call Lister
-                      </Button>
-                    </AlertDialogTrigger>
-
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you sure you want to call this number?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          You are about to call{" "}
-                          <strong>{formattedPhone}</strong>.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => {
-                            if (typeof window !== "undefined") {
-                              window.location.href = callHref;
-                            }
-                          }}
-                          aria-label={`Confirm call to ${formattedPhone}`}
-                        >
-                          Yes, call now
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10">
+                      <Phone className="h-4 w-4" />
+                      Call Lister
+                    </Button>
+                  </CallConfirmDialog>
                 ) : (
                   <Button
                     className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10"

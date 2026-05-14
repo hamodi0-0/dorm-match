@@ -14,7 +14,7 @@ export default function TermsPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 min-h-[calc(100vh-64px)]">
         <section className="max-w-4xl mx-auto px-6 py-16 sm:py-20">
           <h1 className="font-serif text-4xl sm:text-5xl tracking-tight mb-4">
             Terms of Service
