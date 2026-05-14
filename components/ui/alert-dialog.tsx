@@ -53,15 +53,11 @@ function AlertDialogContent({
   onInteractOutside,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
-  onInteractOutside?: (event: Event) => void;
+  onInteractOutside?: React.PointerEventHandler<HTMLDivElement>;
 }) {
   return (
     <AlertDialogPortal>
-      <AlertDialogOverlay
-        onPointerDown={
-          onInteractOutside as React.PointerEventHandler<HTMLDivElement>
-        }
-      />
+      <AlertDialogOverlay onPointerDown={onInteractOutside} />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         className={cn(
