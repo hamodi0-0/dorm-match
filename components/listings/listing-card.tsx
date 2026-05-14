@@ -25,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/lib/types/listing";
 import { ROOM_TYPE_LABELS, BILLING_PERIOD_SUFFIX } from "@/lib/types/listing";
@@ -32,7 +33,23 @@ import type { ListingImage } from "@/lib/types/listing";
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
 import { useCompatibility } from "@/hooks/use-compatibility";
 import { useInitChat } from "@/hooks/use-init-chat";
+import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
+
+function getDialablePhone(phone: string): string | null {
+  if (!phone) return null;
+  const parsed = parsePhoneNumberFromString(phone, "EG");
+  if (parsed) return parsed.number;
+
+  const cleaned = phone.replace(/[^\d+]/g, "").trim();
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+function formatPhoneDisplay(phone: string): string {
+  if (!phone) return "";
+  const parsed = parsePhoneNumberFromString(phone, "EG");
+  return parsed?.formatInternational() ?? phone;
+}
 
 interface ListingCardProps {
   listing: Listing;
@@ -199,6 +216,14 @@ export function ListingCard({
   );
   const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
 
+  const dialablePhone = listing.contact_phone
+    ? getDialablePhone(listing.contact_phone)
+    : null;
+  const callHref = dialablePhone ? `tel:${dialablePhone}` : null;
+  const formattedPhone = listing.contact_phone
+    ? formatPhoneDisplay(listing.contact_phone)
+    : "";
+
   return (
     <TooltipProvider delayDuration={300}>
       <div
@@ -289,21 +314,36 @@ export function ListingCard({
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-1.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
+          <div className="flex items-center gap-1.5 z-10">
+            {callHref ? (
+              <CallConfirmDialog
+                formattedPhone={formattedPhone}
+                callHref={callHref}
+              >
                 <Button
-                  variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5 text-xs"
-                  disabled
+                  className="h-8 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Phone className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Call</span>
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>Contact coming soon</TooltipContent>
-            </Tooltip>
+              </CallConfirmDialog>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs"
+                    disabled
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Call</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Contact coming soon</TooltipContent>
+              </Tooltip>
+            )}
 
             <Button
               variant="outline"

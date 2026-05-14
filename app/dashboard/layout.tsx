@@ -19,7 +19,9 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <StudentNavHeader />
-      <div className="flex-1 flex flex-col">{children}</div>
+      <div className="flex-1 flex flex-col min-h-[calc(100vh-64px)]">
+        {children}
+      </div>
       <Footer />
     </div>
   );
