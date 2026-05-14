@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Inbox, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
