@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, Sparkles, ArrowRight } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,9 +20,10 @@ import {
   useListingFilters,
   type RoomType,
 } from "@/lib/stores/listing-filters-store";
+import { PageLoader } from "../ui/page-loader";
 
 interface DashboardHomeClientProps {
-  initialProfile: StudentProfile;
+  userId: string;
 }
 
 const YEAR_LABELS: Record<string, string> = {
@@ -33,11 +34,9 @@ const YEAR_LABELS: Record<string, string> = {
   graduate: "Graduate",
 };
 
-export function DashboardHomeClient({
-  initialProfile,
-}: DashboardHomeClientProps) {
+export function DashboardHomeClient({ userId }: DashboardHomeClientProps) {
   const router = useRouter();
-  const { data: profile } = useStudentProfile(initialProfile);
+  const { data: profile, isLoading } = useStudentProfile(userId);
 
   const { searchQuery, roomType, setSearchQuery, setRoomType } =
     useListingFilters();
@@ -54,6 +53,10 @@ export function DashboardHomeClient({
     if (e.key === "Enter") {
       handleSearch();
     }
+  }
+
+  if (isLoading || !profile) {
+    return <PageLoader />;
   }
 
   return (

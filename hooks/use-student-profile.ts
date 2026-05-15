@@ -29,30 +29,31 @@ export interface StudentProfile {
   updated_at: string;
 }
 
-async function fetchStudentProfile(): Promise<StudentProfile | null> {
+async function fetchStudentProfile(
+  userId: string,
+): Promise<StudentProfile | null> {
   const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
 
   const { data, error } = await supabase
     .from("student_profiles")
     .select("*")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
-  if (error || !data) return null;
+  if (error || !data) {
+    throw new Error(error?.message || "Profile not found");
+  }
+
   return data as StudentProfile;
 }
 
-export function useStudentProfile(initialData?: StudentProfile) {
+export function useStudentProfile(userId: string) {
   return useQuery<StudentProfile | null>({
-    queryKey: ["student-profile"],
-    queryFn: fetchStudentProfile,
-    initialData,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // Explicitly binding the cache to the user's ID protects data integrity
+    queryKey: ["student-profile", userId],
+    queryFn: () => fetchStudentProfile(userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: !!userId, // Prevents running the query if userId is undefined
   });
 }
