@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 60, // cache dynamic route renders client-side for 60s
+    },
+  },
   images: {
     remotePatterns: [
       {
-        // Supabase storage — covers any project subdomain
         protocol: "https",
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",

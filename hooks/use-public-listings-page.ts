@@ -10,8 +10,6 @@ import { createClient } from "@/lib/supabase/client";
 import type { Listing, RoomType, GenderPreference } from "@/lib/types/listing";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface ListingFiltersQuery {
   search: string;
   roomType: RoomType | null;
@@ -24,8 +22,6 @@ export interface ListingsPageResult {
   tenantProfiles: Record<string, TenantCompatibilityProfile[]>;
   totalCount: number;
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 export const PAGE_SIZE = 10;
 
@@ -64,24 +60,23 @@ export function normalizeFilters(f: ListingFiltersQuery): ListingFiltersQuery {
       ? f.maxPrice
       : null;
 
-  return {
-    search,
-    roomType,
-    maxPrice,
-    genderPreference,
-  };
+  return { search, roomType, maxPrice, genderPreference };
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function isEmptyFilters(f: ListingFiltersQuery): boolean {
   const n = normalizeFilters(f);
   return !n.search && !n.roomType && n.maxPrice === null && !n.genderPreference;
 }
 
-// ─── Fetch fn ─────────────────────────────────────────────────────────────────
+export const EMPTY_FILTERS: ListingFiltersQuery = {
+  search: "",
+  roomType: null,
+  maxPrice: null,
+  genderPreference: null,
+};
 
-async function fetchListingsPage(
+// Exported so the dashboard home page can prefetch without re-importing Supabase logic
+export async function fetchListingsPage(
   page: number,
   filters: ListingFiltersQuery,
 ): Promise<ListingsPageResult> {
@@ -107,15 +102,11 @@ async function fetchListingsPage(
       `title.ilike.%${s}%,city.ilike.%${s}%,university_name.ilike.%${s}%,address_line.ilike.%${s}%`,
     );
   }
-  if (normalized.roomType) {
-    q = q.eq("room_type", normalized.roomType);
-  }
-  if (normalized.maxPrice !== null) {
+  if (normalized.roomType) q = q.eq("room_type", normalized.roomType);
+  if (normalized.maxPrice !== null)
     q = q.lte("price_per_month", normalized.maxPrice);
-  }
-  if (normalized.genderPreference) {
+  if (normalized.genderPreference)
     q = q.eq("gender_preference", normalized.genderPreference);
-  }
 
   const { data: listingRows, count, error } = await q;
   if (error) throw new Error(error.message);
@@ -152,7 +143,6 @@ async function fetchListingsPage(
   const multiOccupantIds = listings
     .filter((l) => l.max_occupants > 1)
     .map((l) => l.id);
-
   const tenantProfiles: Record<string, TenantCompatibilityProfile[]> = {};
 
   if (multiOccupantIds.length > 0) {
@@ -190,8 +180,6 @@ async function fetchListingsPage(
   return { listings, tenantProfiles, totalCount: count ?? 0 };
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
 export function usePublicListingsPage(
   page: number,
   filters: ListingFiltersQuery,
@@ -199,14 +187,14 @@ export function usePublicListingsPage(
 ) {
   const queryClient = useQueryClient();
   const normalizedFilters = normalizeFilters(filters);
-
   const isFirstPageNoFilters = page === 1 && isEmptyFilters(normalizedFilters);
 
   const query = useQuery<ListingsPageResult>({
     queryKey: ["public-listings-page", page, normalizedFilters],
     queryFn: () => fetchListingsPage(page, normalizedFilters),
     initialData: isFirstPageNoFilters ? initialData : undefined,
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000, // treat data as fresh for 60s — no background refetch on focus
+    gcTime: 10 * 60 * 1000, // keep in cache for 10 minutes — instant return navigation
     placeholderData: keepPreviousData,
   });
 
@@ -216,7 +204,7 @@ export function usePublicListingsPage(
       queryClient.prefetchQuery({
         queryKey: ["public-listings-page", page + 1, normalizedFilters],
         queryFn: () => fetchListingsPage(page + 1, normalizedFilters),
-        staleTime: 30 * 1000,
+        staleTime: 60 * 1000,
       });
     }
   }, [page, normalizedFilters, query.data?.totalCount, queryClient]);

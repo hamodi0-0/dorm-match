@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, Sparkles, ArrowRight } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,19 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useStudentProfile,
-  type StudentProfile,
-} from "@/hooks/use-student-profile";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 import {
   useListingFilters,
   type RoomType,
 } from "@/lib/stores/listing-filters-store";
-
-interface DashboardHomeClientProps {
-  initialProfile: StudentProfile;
-}
-
+import { PageLoader } from "../ui/page-loader";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  fetchListingsPage,
+  EMPTY_FILTERS,
+} from "@/hooks/use-public-listings-page";
 const YEAR_LABELS: Record<string, string> = {
   "1st_year": "1st Year",
   "2nd_year": "2nd Year",
@@ -33,14 +32,26 @@ const YEAR_LABELS: Record<string, string> = {
   graduate: "Graduate",
 };
 
-export function DashboardHomeClient({
-  initialProfile,
-}: DashboardHomeClientProps) {
+export function DashboardHomeClient() {
   const router = useRouter();
-  const { data: profile } = useStudentProfile(initialProfile);
-
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading } = useStudentProfile();
   const { searchQuery, roomType, setSearchQuery, setRoomType } =
     useListingFilters();
+
+  // Prefetch page 1 of listings as soon as the home page mounts.
+  // By the time the user clicks "Browse Listings", the data is already in cache.
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["public-listings-page", 1, EMPTY_FILTERS],
+      queryFn: () => fetchListingsPage(1, EMPTY_FILTERS),
+      staleTime: 60 * 1000,
+    });
+  }, [queryClient]);
+
+  if (isLoading || !profile) {
+    return <PageLoader />;
+  }
 
   const firstName = profile!.full_name.split(" ")[0];
   const yearLabel =

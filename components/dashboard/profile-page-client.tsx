@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { User, GraduationCap, Moon, Sparkles, MapPin } from "lucide-react";
 import {
   Card,
@@ -90,17 +90,13 @@ const CLEANLINESS_OPTIONS = [
 // ─── Props ───────────────────────────────────────────────────────────────────
 
 interface ProfilePageClientProps {
-  initialProfile: StudentProfile;
   userEmail: string;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function ProfilePageClient({
-  initialProfile,
-  userEmail,
-}: ProfilePageClientProps) {
-  const { data: profile } = useStudentProfile(initialProfile);
+export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
+  const { data: profile } = useStudentProfile();
   const {
     mutate: updateProfile,
     isPending,
