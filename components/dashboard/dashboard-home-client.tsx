@@ -12,20 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useStudentProfile,
-  type StudentProfile,
-} from "@/hooks/use-student-profile";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 import {
   useListingFilters,
   type RoomType,
 } from "@/lib/stores/listing-filters-store";
 import { PageLoader } from "../ui/page-loader";
-
-interface DashboardHomeClientProps {
-  userId: string;
-}
-
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  fetchListingsPage,
+  EMPTY_FILTERS,
+} from "@/hooks/use-public-listings-page";
 const YEAR_LABELS: Record<string, string> = {
   "1st_year": "1st Year",
   "2nd_year": "2nd Year",
@@ -34,12 +32,26 @@ const YEAR_LABELS: Record<string, string> = {
   graduate: "Graduate",
 };
 
-export function DashboardHomeClient({ userId }: DashboardHomeClientProps) {
+export function DashboardHomeClient() {
   const router = useRouter();
-  const { data: profile, isLoading } = useStudentProfile(userId);
-
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading } = useStudentProfile();
   const { searchQuery, roomType, setSearchQuery, setRoomType } =
     useListingFilters();
+
+  // Prefetch page 1 of listings as soon as the home page mounts.
+  // By the time the user clicks "Browse Listings", the data is already in cache.
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["public-listings-page", 1, EMPTY_FILTERS],
+      queryFn: () => fetchListingsPage(1, EMPTY_FILTERS),
+      staleTime: 60 * 1000,
+    });
+  }, [queryClient]);
+
+  if (isLoading || !profile) {
+    return <PageLoader />;
+  }
 
   const firstName = profile!.full_name.split(" ")[0];
   const yearLabel =
@@ -53,10 +65,6 @@ export function DashboardHomeClient({ userId }: DashboardHomeClientProps) {
     if (e.key === "Enter") {
       handleSearch();
     }
-  }
-
-  if (isLoading || !profile) {
-    return <PageLoader />;
   }
 
   return (

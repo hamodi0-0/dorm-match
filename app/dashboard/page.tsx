@@ -15,5 +15,5 @@ export default async function StudentHomePage() {
 
   // Notice: We don't await the profile query here anymore.
   // We just hand off the user ID to the client instantly.
-  return <DashboardHomeClient userId={user.id} />;
+  return <DashboardHomeClient />;
 }
