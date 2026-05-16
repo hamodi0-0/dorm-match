@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Search, SlidersHorizontal, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,13 +19,14 @@ import {
   useListingFilters,
   type RoomType,
 } from "@/lib/stores/listing-filters-store";
-import { PageLoader } from "../ui/page-loader";
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   fetchListingsPage,
   EMPTY_FILTERS,
 } from "@/hooks/use-public-listings-page";
+import type { Listing } from "@/lib/types/listing";
+import { ListingsPageResult } from "@/lib/types/listings-browse";
+import { PageLoader } from "../ui/page-loader";
+
 const YEAR_LABELS: Record<string, string> = {
   "1st_year": "1st Year",
   "2nd_year": "2nd Year",
@@ -32,6 +35,37 @@ const YEAR_LABELS: Record<string, string> = {
   graduate: "Graduate",
 };
 
+const QUERY_KEY = ["public-listings-page", 1, EMPTY_FILTERS] as const;
+
+// w=384 covers 1× displays (card renders ~320px → Next picks 384)
+// w=640 covers 2× retina and wide mobile
+const PREFETCH_WIDTHS = [384, 640] as const;
+
+function getCoverUrl(listing: Listing): string | null {
+  const images = listing.listing_images;
+  if (!images?.length) return null;
+  return (images.find((img) => img.is_cover) ?? images[0])?.public_url ?? null;
+}
+
+function prefetchCoverImages(listings: Listing[]): void {
+  listings.slice(0, 6).forEach((listing) => {
+    const url = getCoverUrl(listing);
+    if (!url) return;
+
+    PREFETCH_WIDTHS.forEach((w) => {
+      const href = `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`;
+      if (document.head.querySelector(`link[href="${CSS.escape(href)}"]`))
+        return;
+
+      const link = document.createElement("link");
+      link.rel = "prefetch";
+      link.as = "image";
+      link.href = href;
+      document.head.appendChild(link);
+    });
+  });
+}
+
 export function DashboardHomeClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -39,19 +73,28 @@ export function DashboardHomeClient() {
   const { searchQuery, roomType, setSearchQuery, setRoomType } =
     useListingFilters();
 
-  // Prefetch page 1 of listings as soon as the home page mounts.
-  // By the time the user clicks "Browse Listings", the data is already in cache.
   useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: ["public-listings-page", 1, EMPTY_FILTERS],
-      queryFn: () => fetchListingsPage(1, EMPTY_FILTERS),
-      staleTime: 60 * 1000,
-    });
+    // Data already in cache (e.g. user returned to home) — prefetch images immediately
+    const cached = queryClient.getQueryData<ListingsPageResult>(QUERY_KEY);
+    if (cached) {
+      prefetchCoverImages(cached.listings);
+      return;
+    }
+
+    // No cache yet — fetch listings data first, then prefetch images once we have URLs
+    queryClient
+      .prefetchQuery({
+        queryKey: QUERY_KEY,
+        queryFn: () => fetchListingsPage(1, EMPTY_FILTERS),
+        staleTime: 60 * 1000,
+      })
+      .then(() => {
+        const data = queryClient.getQueryData<ListingsPageResult>(QUERY_KEY);
+        if (data) prefetchCoverImages(data.listings);
+      });
   }, [queryClient]);
 
-  if (isLoading || !profile) {
-    return <PageLoader />;
-  }
+  if (!profile || isLoading) return <PageLoader />;
 
   const firstName = profile!.full_name.split(" ")[0];
   const yearLabel =
@@ -62,28 +105,20 @@ export function DashboardHomeClient() {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   }
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
-      {/* ── Welcome ───────────────────────────────────────────────────── */}
       <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-medium text-foreground">
-              Welcome back, {firstName}! 👋
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              {yearLabel} · {profile!.major} · {profile!.university_name}
-            </p>
-          </div>
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-serif font-medium text-foreground">
+          Welcome back, {firstName}! 👋
+        </h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+          {yearLabel} · {profile!.major} · {profile!.university_name}
+        </p>
       </div>
 
-      {/* ── Search Card ───────────────────────────────────────────────── */}
       <Card className="mb-10 py-0 shadow-sm">
         <CardContent className="p-5 sm:p-6">
           <h2 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
@@ -111,7 +146,7 @@ export function DashboardHomeClient() {
                 setRoomType(v === "all" ? null : (v as RoomType))
               }
             >
-              <SelectTrigger className="h-10 w-auto min-w-32.5">
+              <SelectTrigger className="h-10 w-auto min-w-[130px]">
                 <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                 <SelectValue placeholder="Room Type" />
               </SelectTrigger>
