@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ListingsGridClient } from "@/components/listings/listings-browse-client";
 import type { Listing } from "@/lib/types/listing";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
-import type { ListingsPageResult } from "@/hooks/use-public-listings-page";
+import type { ListingsPageResult } from "@/lib/types/listings-browse";
 
 const PAGE_SIZE = 10;
 

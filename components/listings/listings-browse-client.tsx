@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  Search,
-  SlidersHorizontal,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -26,110 +19,19 @@ import {
   PAGE_SIZE,
   normalizeFilters,
 } from "@/hooks/use-public-listings-page";
-import type { ListingsPageResult } from "@/hooks/use-public-listings-page";
 import { ListingCard } from "@/components/listings/listing-card";
+import { ListingsBrowsePagination } from "@/components/listings/listings-browse-pagination";
+import { ListingsBrowseSkeleton } from "@/components/listings/listings-browse-skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useListingFilters } from "@/lib/stores/listing-filters-store";
 import { cn } from "@/lib/utils";
 import type { GenderPreference, RoomType } from "@/lib/types/listing";
+import type {
+  ListingsBrowseClientProps,
+  ListingsFilterChange,
+} from "@/lib/types/listings-browse";
 
-interface ListingsGridClientProps {
-  initialData: ListingsPageResult;
-}
-
-// ── Skeleton ───────────────────────────────────────────────────────────────────
-
-function CardSkeleton() {
-  return (
-    <div className="rounded-xl border bg-card overflow-hidden flex h-42.5">
-      <Skeleton className="w-60 shrink-0 h-full" />
-      <div className="flex-1 p-4 space-y-3">
-        <Skeleton className="h-3 w-1/4" />
-        <Skeleton className="h-5 w-2/5" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-3 w-3/4" />
-        <div className="flex gap-4 pt-1">
-          <Skeleton className="h-3 w-12" />
-          <Skeleton className="h-3 w-16" />
-          <Skeleton className="h-3 w-14" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Pagination ─────────────────────────────────────────────────────────────────
-
-function PaginationControls({
-  page,
-  totalCount,
-  isPlaceholder,
-  onPageChange,
-}: {
-  page: number;
-  totalCount: number;
-  isPlaceholder: boolean;
-  onPageChange: (p: number) => void;
-}) {
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  if (totalPages <= 1) return null;
-
-  return (
-    <div className="flex items-center justify-center gap-2 pt-4">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page === 1 || isPlaceholder}
-        onClick={() => onPageChange(page - 1)}
-      >
-        <ChevronLeft className="h-4 w-4 mr-1" />
-        Prev
-      </Button>
-
-      <div className="flex items-center gap-1">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-          const show = p === 1 || p === totalPages || Math.abs(p - page) <= 1;
-          if (!show) {
-            if (p === 2 || p === totalPages - 1) {
-              return (
-                <span key={p} className="text-muted-foreground text-sm px-1">
-                  …
-                </span>
-              );
-            }
-            return null;
-          }
-          return (
-            <Button
-              key={p}
-              variant={p === page ? "default" : "outline"}
-              size="sm"
-              className="w-9 h-9"
-              disabled={isPlaceholder}
-              onClick={() => onPageChange(p)}
-            >
-              {p}
-            </Button>
-          );
-        })}
-      </div>
-
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page === totalPages || isPlaceholder}
-        onClick={() => onPageChange(page + 1)}
-      >
-        Next
-        <ChevronRight className="h-4 w-4 ml-1" />
-      </Button>
-    </div>
-  );
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
-
-export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
+export function ListingsGridClient({ initialData }: ListingsBrowseClientProps) {
   const [page, setPage] = useState(1);
 
   const {
@@ -165,11 +67,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
   const tenantProfiles = data?.tenantProfiles ?? {};
   const totalCount = data?.totalCount ?? 0;
 
-  function handleFilterChange(next: {
-    roomType?: RoomType | null;
-    maxPrice?: number | null;
-    genderPreference?: GenderPreference | null;
-  }) {
+  function handleFilterChange(next: ListingsFilterChange) {
     if ("roomType" in next) setRoomType(next.roomType ?? null);
     if ("maxPrice" in next) setMaxPrice(next.maxPrice ?? null);
     if ("genderPreference" in next)
@@ -460,11 +358,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
           )}
         >
           {isFetching && listings.length === 0 ? (
-            <div className="flex flex-col gap-4">
-              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <CardSkeleton key={i} />
-              ))}
-            </div>
+            <ListingsBrowseSkeleton count={PAGE_SIZE} />
           ) : isOutOfRangePage ? (
             <Card className="py-20 text-center mt-4">
               <CardContent className="flex flex-col items-center gap-3">
@@ -526,7 +420,7 @@ export function ListingsGridClient({ initialData }: ListingsGridClientProps) {
           )}
         </div>
 
-        <PaginationControls
+        <ListingsBrowsePagination
           page={page}
           totalCount={totalCount}
           isPlaceholder={isPlaceholderData}
