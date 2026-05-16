@@ -98,7 +98,8 @@ export function useListerNotifications(
     enabled: !!liserId,
     initialData,
     queryFn: () => fetchListerNotifications(liserId!),
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
@@ -118,7 +119,7 @@ export interface StudentNotificationItem {
   message: string | null;
   createdAt: string;
   updatedAt: string;
-  readAt: string | null; // null = unread
+  readAt: string | null;
 }
 
 async function fetchStudentNotifications(
@@ -178,11 +179,11 @@ export function useStudentNotifications(
     enabled: !!userId,
     initialData,
     queryFn: () => fetchStudentNotifications(userId!),
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
-// Unread = non-pending AND read_at is null
 export function useStudentUnreadCount(userId: string | null): number {
   const { data } = useStudentNotifications(userId);
   return data?.filter((n) => n.readAt === null).length ?? 0;

@@ -21,7 +21,6 @@ import {
 } from "@/lib/stores/listing-filters-store";
 import { fetchListingsPage } from "@/hooks/use-public-listings-page";
 import { ListingsPageResult } from "@/lib/types/listings-browse";
-import { PageLoader } from "../ui/page-loader";
 import {
   EMPTY_FILTERS,
   PUBLIC_LISTINGS_QUERY_BASE,

@@ -8,17 +8,40 @@ import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useChatStore } from "@/lib/stores/chat-store";
-import { PageLoader } from "../ui/page-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChatWindowProps {
   conversation: Conversation;
   currentUserId: string;
   basePath: string;
+}
+
+function MessagesSkeleton() {
+  return (
+    <div className="flex-1 overflow-hidden p-4 flex flex-col gap-4">
+      <div className="self-end flex flex-col items-end gap-1">
+        <Skeleton className="h-9 w-24 rounded-2xl rounded-br-sm" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <div className="self-start flex flex-col items-start gap-1">
+        <Skeleton className="h-9 w-40 rounded-2xl rounded-bl-sm" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <div className="self-end flex flex-col items-end gap-1">
+        <Skeleton className="h-9 w-32 rounded-2xl rounded-br-sm" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <div className="self-start flex flex-col items-start gap-1">
+        <Skeleton className="h-9 w-48 rounded-2xl rounded-bl-sm" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+    </div>
+  );
 }
 
 export function ChatWindow({
@@ -27,7 +50,9 @@ export function ChatWindow({
   basePath,
 }: ChatWindowProps) {
   const { data: messages, isLoading } = useMessages(conversation.id);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  // Ref on the scrollable container — not on a bottom sentinel
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
   const queryClient = useQueryClient();
   const { decrementUnreadCount } = useChatStore();
 
@@ -36,11 +61,20 @@ export function ChatWindow({
   const participantName = otherUser?.full_name || "Unknown User";
   const initials = participantName.substring(0, 2).toUpperCase();
 
-  // Auto-scroll to bottom
+  // Scroll the container — not the window
   useEffect(() => {
-    if (messages && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    if (!messages?.length || !scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+
+    if (prevMessageCountRef.current === 0) {
+      // Initial load: jump instantly to bottom
+      container.scrollTop = container.scrollHeight;
+    } else if (messages.length > prevMessageCountRef.current) {
+      // New message arrived: smooth scroll within the container
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     }
+
+    prevMessageCountRef.current = messages.length;
   }, [messages]);
 
   // Mark messages as read
@@ -65,7 +99,6 @@ export function ChatWindow({
           );
 
         if (!error) {
-          // Optimistically update the messages cache so we don't trigger this again while waiting for realtime
           queryClient.setQueryData<Message[]>(
             ["messages", conversation.id],
             (old) => {
@@ -82,7 +115,6 @@ export function ChatWindow({
             decrementUnreadCount();
           }
 
-          // Invalidate so Sidebar reflects no unread
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }
       };
@@ -96,10 +128,6 @@ export function ChatWindow({
     queryClient,
     conversation.id,
   ]);
-
-  if (isLoading) {
-    return <PageLoader className="min-h-[50vh]" />;
-  }
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 bg-background relative">
@@ -135,41 +163,45 @@ export function ChatWindow({
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
-        {messages?.map((message) => {
-          const isMe = message.sender_id === currentUserId;
-
-          return (
-            <div
-              key={message.id}
-              className={cn(
-                "flex flex-col max-w-[80%]",
-                isMe ? "self-end items-end" : "self-start items-start",
-              )}
-            >
+      {/* Messages — ref is on the scrollable container itself */}
+      {isLoading ? (
+        <MessagesSkeleton />
+      ) : (
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col"
+        >
+          {messages?.map((message) => {
+            const isMe = message.sender_id === currentUserId;
+            return (
               <div
+                key={message.id}
                 className={cn(
-                  "px-4 py-2 rounded-2xl",
-                  isMe
-                    ? "bg-primary text-primary-foreground rounded-br-sm"
-                    : "bg-muted text-foreground rounded-bl-sm",
+                  "flex flex-col max-w-[80%]",
+                  isMe ? "self-end items-end" : "self-start items-start",
                 )}
               >
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
+                <div
+                  className={cn(
+                    "px-4 py-2 rounded-2xl",
+                    isMe
+                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      : "bg-muted text-foreground rounded-bl-sm",
+                  )}
+                >
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                </div>
+                <span className="text-[10px] text-muted-foreground mt-1 mx-1 px-1">
+                  {format(new Date(message.created_at), "h:mm a")}
+                </span>
               </div>
-              <span className="text-[10px] text-muted-foreground mt-1 mx-1 px-1">
-                {format(new Date(message.created_at), "h:mm a")}
-              </span>
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Input Placeholder */}
       <MessageInput
         conversationId={conversation.id}
         currentUserId={currentUserId}

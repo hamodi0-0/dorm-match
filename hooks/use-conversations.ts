@@ -13,15 +13,9 @@ async function fetchConversations(): Promise<Conversation[]> {
 
   if (!user) return [];
 
-  // Fetch conversations where the user is either the student or the lister
   const { data: conversationsData, error: conversationsError } = await supabase
     .from("conversations")
-    .select(
-      `
-      *,
-      listing:listings(title)
-    `,
-    )
+    .select(`*, listing:listings(title)`)
     .or(`student_id.eq.${user.id},lister_id.eq.${user.id}`)
     .order("updated_at", { ascending: false });
 
@@ -36,7 +30,6 @@ async function fetchConversations(): Promise<Conversation[]> {
   const studentIds = [...new Set(conversationsData.map((c) => c.student_id))];
   const listerIds = [...new Set(conversationsData.map((c) => c.lister_id))];
 
-  // Batch fetch profiles due to auth.users FK join quirks
   const [
     { data: studentProfilesData },
     { data: listerProfilesData },
@@ -62,12 +55,9 @@ async function fetchConversations(): Promise<Conversation[]> {
   }
 
   const messages = (messagesData as Message[]) || [];
-
-  // Create lookup maps
   const studentMap = new Map((studentProfilesData || []).map((p) => [p.id, p]));
   const listerMap = new Map((listerProfilesData || []).map((p) => [p.id, p]));
 
-  // Attach last_message, unread_count, and mapped profiles
   const enrichedConversations = conversationsData.map((conv) => {
     const student = studentMap.get(conv.student_id) || {
       full_name: "Unknown Student",
@@ -82,8 +72,7 @@ async function fetchConversations(): Promise<Conversation[]> {
       : conv.listing;
 
     const convMessages = messages.filter((m) => m.conversation_id === conv.id);
-    const lastMessage = convMessages[0]; // Already ordered by created_at desc
-
+    const lastMessage = convMessages[0];
     const unreadCount = convMessages.filter(
       (m) => m.sender_id !== user.id && m.read_at === null,
     ).length;
@@ -109,48 +98,37 @@ export function useConversations(initialData?: Conversation[]) {
     queryKey: ["conversations"],
     queryFn: fetchConversations,
     initialData,
-    staleTime: 0, // Always refetch to ensure we get the latest when remounting
+    staleTime: 30 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Global realtime subscription for the sidebar
   useEffect(() => {
-    // We subscribe to all new messages so the sidebar can update immediately when someone texts us
     const channel = supabase
       .channel("realtime:all-messages")
       .on(
         "postgres_changes",
         {
-          event: "*", // INSERT or UPDATE
+          event: "*",
           schema: "public",
           table: "messages",
         },
         (payload) => {
-          // Invalidate the conversations cache so the sidebar immediately updates
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
 
-          // Also invalidate the specific conversation's messages just in case
-          // Immediately update local cache for the active chat window
           if (
             payload.eventType === "INSERT" &&
             payload.new &&
-            (payload.new as any).conversation_id
+            (payload.new as Record<string, unknown>)["conversation_id"]
           ) {
+            const newMsg = payload.new as Message;
             queryClient.setQueryData<Message[]>(
-              ["messages", (payload.new as any).conversation_id],
+              ["messages", newMsg.conversation_id],
               (old) => {
-                if (!old) return [payload.new as Message];
-                if (old.some((m) => m.id === (payload.new as any).id))
-                  return old;
-                return [...old, payload.new as Message];
+                if (!old) return [newMsg];
+                if (old.some((m) => m.id === newMsg.id)) return old;
+                return [...old, newMsg];
               },
             );
-          }
-
-          if (payload.new && (payload.new as any).conversation_id) {
-            // Disabled invalidation to stop React Query from fetching old cached HTTP responses
-            // queryClient.invalidateQueries({
-            //   queryKey: ["messages", (payload.new as any).conversation_id],
-            // });
           }
         },
       )
