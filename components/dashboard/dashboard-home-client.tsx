@@ -19,52 +19,17 @@ import {
   useListingFilters,
   type RoomType,
 } from "@/lib/stores/listing-filters-store";
-import {
-  fetchListingsPage,
-  EMPTY_FILTERS,
-} from "@/hooks/use-public-listings-page";
-import type { Listing } from "@/lib/types/listing";
+import { fetchListingsPage } from "@/hooks/use-public-listings-page";
 import { ListingsPageResult } from "@/lib/types/listings-browse";
 import { PageLoader } from "../ui/page-loader";
+import {
+  EMPTY_FILTERS,
+  PUBLIC_LISTINGS_QUERY_BASE,
+  YEAR_LABELS,
+} from "@/lib/constants";
+import { prefetchCoverImages } from "@/lib/helpers/image";
 
-const YEAR_LABELS: Record<string, string> = {
-  "1st_year": "1st Year",
-  "2nd_year": "2nd Year",
-  "3rd_year": "3rd Year",
-  "4th_year": "4th Year",
-  graduate: "Graduate",
-};
-
-const QUERY_KEY = ["public-listings-page", 1, EMPTY_FILTERS] as const;
-
-// w=384 covers 1× displays (card renders ~320px → Next picks 384)
-// w=640 covers 2× retina and wide mobile
-const PREFETCH_WIDTHS = [384, 640] as const;
-
-function getCoverUrl(listing: Listing): string | null {
-  const images = listing.listing_images;
-  if (!images?.length) return null;
-  return (images.find((img) => img.is_cover) ?? images[0])?.public_url ?? null;
-}
-
-function prefetchCoverImages(listings: Listing[]): void {
-  listings.slice(0, 6).forEach((listing) => {
-    const url = getCoverUrl(listing);
-    if (!url) return;
-
-    PREFETCH_WIDTHS.forEach((w) => {
-      const href = `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`;
-      if (document.head.querySelector(`link[href="${CSS.escape(href)}"]`))
-        return;
-
-      const link = document.createElement("link");
-      link.rel = "prefetch";
-      link.as = "image";
-      link.href = href;
-      document.head.appendChild(link);
-    });
-  });
-}
+const QUERY_KEY = [PUBLIC_LISTINGS_QUERY_BASE, 1, EMPTY_FILTERS] as const;
 
 export function DashboardHomeClient() {
   const router = useRouter();
@@ -94,7 +59,7 @@ export function DashboardHomeClient() {
       });
   }, [queryClient]);
 
-  if (!profile || isLoading) return <PageLoader />;
+  if (!profile || isLoading) return;
 
   const firstName = profile!.full_name.split(" ")[0];
   const yearLabel =

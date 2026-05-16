@@ -7,64 +7,14 @@ import {
 } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Listing, RoomType, GenderPreference } from "@/lib/types/listing";
+import type { Listing } from "@/lib/types/listing";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 import type {
   ListingFiltersQuery,
   ListingsPageResult,
 } from "@/lib/types/listings-browse";
-
-export const PAGE_SIZE = 10;
-
-const ROOM_TYPES: RoomType[] = [
-  "single",
-  "shared",
-  "studio",
-  "entire_apartment",
-];
-const GENDER_PREFERENCES: GenderPreference[] = [
-  "male_only",
-  "female_only",
-  "mixed",
-  "no_preference",
-];
-const MAX_PRICE_OPTIONS = [500, 750, 1000, 1500, 2000] as const;
-
-function isValidRoomType(value: unknown): value is RoomType {
-  return ROOM_TYPES.includes(value as RoomType);
-}
-
-function isValidGenderPreference(value: unknown): value is GenderPreference {
-  return GENDER_PREFERENCES.includes(value as GenderPreference);
-}
-
-export function normalizeFilters(f: ListingFiltersQuery): ListingFiltersQuery {
-  const search = f.search.trim();
-  const roomType = isValidRoomType(f.roomType) ? f.roomType : null;
-  const genderPreference = isValidGenderPreference(f.genderPreference)
-    ? f.genderPreference
-    : null;
-  const maxPrice =
-    typeof f.maxPrice === "number" &&
-    Number.isFinite(f.maxPrice) &&
-    MAX_PRICE_OPTIONS.includes(f.maxPrice as (typeof MAX_PRICE_OPTIONS)[number])
-      ? f.maxPrice
-      : null;
-
-  return { search, roomType, maxPrice, genderPreference };
-}
-
-export function isEmptyFilters(f: ListingFiltersQuery): boolean {
-  const n = normalizeFilters(f);
-  return !n.search && !n.roomType && n.maxPrice === null && !n.genderPreference;
-}
-
-export const EMPTY_FILTERS: ListingFiltersQuery = {
-  search: "",
-  roomType: null,
-  maxPrice: null,
-  genderPreference: null,
-};
+import { PAGE_SIZE } from "@/lib/constants";
+import { normalizeFilters, isEmptyFilters } from "@/lib/helpers/listings";
 
 // Exported so the dashboard home page can prefetch without re-importing Supabase logic
 export async function fetchListingsPage(

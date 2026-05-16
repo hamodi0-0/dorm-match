@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PAGE_SIZE } from "@/hooks/use-public-listings-page";
 import type { ListingsPaginationProps } from "@/lib/types/listings-browse";
+import { PAGE_SIZE } from "@/lib/constants";
 
 export function ListingsBrowsePagination({
   page,

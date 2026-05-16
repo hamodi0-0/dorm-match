@@ -1,5 +1,9 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
+import { StudentProfile } from "@/hooks/use-student-profile";
+import { TenantCompatibilityProfile } from "./compatibility";
+import { ListingsPaginationProps } from "./listings-browse";
+
 export type RoomType = "single" | "shared" | "studio" | "entire_apartment";
 export type GenderPreference =
   | "male_only"
@@ -58,6 +62,23 @@ export interface ListingImage {
   position: number;
   is_cover: boolean;
   created_at: string;
+}
+
+export interface ResultsProps extends ListingsPaginationProps {
+  listings: Listing[];
+  tenantProfiles: Record<string, TenantCompatibilityProfile[]>;
+  viewerProfile: StudentProfile | null | undefined;
+  isFetching: boolean;
+  isPlaceholderData: boolean;
+  isSuggestedView: boolean;
+  isOutOfRangePage: boolean;
+  showNoSearchResults: boolean;
+}
+
+export interface ListingCardProps {
+  listing: Listing;
+  tenantProfiles?: TenantCompatibilityProfile[]; // <-- add this
+  viewerProfile?: TenantCompatibilityProfile | null; // <-- add this
 }
 
 // ─── Tenant request types ─────────────────────────────────────────────────────

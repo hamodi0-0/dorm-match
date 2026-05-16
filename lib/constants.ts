@@ -233,3 +233,60 @@ export const COMMON_MAJORS = [
   "Womens Studies",
   "Zoology",
 ];
+
+// Listings pagination + filters
+export const PAGE_SIZE = 10;
+
+export const ROOM_TYPES = [
+  "single",
+  "shared",
+  "studio",
+  "entire_apartment",
+] as const;
+
+export const GENDER_PREFERENCES = [
+  "male_only",
+  "female_only",
+  "mixed",
+  "no_preference",
+] as const;
+
+export const MAX_PRICE_OPTIONS = [500, 750, 1000, 1500, 2000] as const;
+
+export const PUBLIC_LISTINGS_QUERY_BASE = "public-listings-page";
+
+export const PREFETCH_WIDTHS = [384, 640] as const;
+
+export const EMPTY_FILTERS = {
+  search: "",
+  roomType: null,
+  maxPrice: null,
+  genderPreference: null,
+};
+
+export const YEAR_LABELS: Record<string, string> = {
+  "1st_year": "1st Year",
+  "2nd_year": "2nd Year",
+  "3rd_year": "3rd Year",
+  "4th_year": "4th Year",
+  graduate: "Graduate",
+};
+
+// Compatibility label maps
+export const SLEEP_LABELS: Record<string, string> = {
+  early_bird: "Early Bird",
+  night_owl: "Night Owl",
+  flexible: "Flexible",
+};
+
+export const NOISE_LABELS: Record<string, string> = {
+  quiet: "Quiet",
+  moderate: "Moderate",
+  social: "Social",
+};
+
+export const GUEST_LABELS: Record<string, string> = {
+  rarely: "Rarely",
+  sometimes: "Sometimes",
+  often: "Often",
+};
