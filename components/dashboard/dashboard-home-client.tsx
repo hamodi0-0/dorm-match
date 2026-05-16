@@ -59,7 +59,7 @@ export function DashboardHomeClient() {
       });
   }, [queryClient]);
 
-  if (!profile || isLoading) return <PageLoader />;
+  if (!profile || isLoading) return;
 
   const firstName = profile!.full_name.split(" ")[0];
   const yearLabel =

@@ -7,7 +7,6 @@ import { ListingsFilterBar } from "@/components/listings/listings-filter-bar";
 import { ListingsResults } from "@/components/listings/listings-results";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useListingFilters } from "@/lib/stores/listing-filters-store";
-import type {} from "@/lib/types/listing";
 import type {
   ListingsBrowseClientProps,
   ListingsFilterChange,

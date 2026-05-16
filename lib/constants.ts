@@ -271,3 +271,22 @@ export const YEAR_LABELS: Record<string, string> = {
   "4th_year": "4th Year",
   graduate: "Graduate",
 };
+
+// Compatibility label maps
+export const SLEEP_LABELS: Record<string, string> = {
+  early_bird: "Early Bird",
+  night_owl: "Night Owl",
+  flexible: "Flexible",
+};
+
+export const NOISE_LABELS: Record<string, string> = {
+  quiet: "Quiet",
+  moderate: "Moderate",
+  social: "Social",
+};
+
+export const GUEST_LABELS: Record<string, string> = {
+  rarely: "Rarely",
+  sometimes: "Sometimes",
+  often: "Often",
+};
