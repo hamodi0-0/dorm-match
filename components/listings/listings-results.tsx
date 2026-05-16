@@ -10,11 +10,12 @@ import { cn } from "@/lib/utils";
 import type { Listing } from "@/lib/types/listing";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 import type { ListingsPaginationProps } from "@/lib/types/listings-browse";
+import { StudentProfile } from "@/hooks/use-student-profile";
 
 interface ResultsProps extends ListingsPaginationProps {
   listings: Listing[];
   tenantProfiles: Record<string, TenantCompatibilityProfile[]>;
-  viewerProfile: any;
+  viewerProfile: StudentProfile | null | undefined;
   isFetching: boolean;
   isPlaceholderData: boolean;
   isSuggestedView: boolean;
