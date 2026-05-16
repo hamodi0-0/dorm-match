@@ -111,7 +111,7 @@ export function DashboardHomeClient() {
                 setRoomType(v === "all" ? null : (v as RoomType))
               }
             >
-              <SelectTrigger className="h-10 w-auto min-w-[130px]">
+              <SelectTrigger className="h-10 w-auto min-w-32.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                 <SelectValue placeholder="Room Type" />
               </SelectTrigger>

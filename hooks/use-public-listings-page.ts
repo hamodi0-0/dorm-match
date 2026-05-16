@@ -9,19 +9,10 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Listing, RoomType, GenderPreference } from "@/lib/types/listing";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
-
-export interface ListingFiltersQuery {
-  search: string;
-  roomType: RoomType | null;
-  maxPrice: number | null;
-  genderPreference: GenderPreference | null;
-}
-
-export interface ListingsPageResult {
-  listings: Listing[];
-  tenantProfiles: Record<string, TenantCompatibilityProfile[]>;
-  totalCount: number;
-}
+import type {
+  ListingFiltersQuery,
+  ListingsPageResult,
+} from "@/lib/types/listings-browse";
 
 export const PAGE_SIZE = 10;
 
