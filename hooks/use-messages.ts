@@ -6,7 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import { Message } from "@/lib/types/chat";
 import { useChatStore } from "@/lib/stores/chat-store";
 
-async function fetchMessages(conversationId: string): Promise<Message[]> {
+export async function fetchMessages(
+  conversationId: string,
+): Promise<Message[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("messages")
@@ -32,12 +34,10 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
     queryFn: () => fetchMessages(conversationId),
     initialData,
     enabled: !!conversationId,
-    // When staleTime is too high, navigating away and back causes the chat view to show
-    // cached messages without refetching, preventing new messages from showing up.
     staleTime: 0,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Set up real-time subscription for new messages
   useEffect(() => {
     if (!conversationId) return;
 
@@ -54,7 +54,6 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
         async (payload) => {
           const newMessage = payload.new as Message;
 
-          // Immediately update UI cache without waiting for refetch
           queryClient.setQueryData<Message[]>(
             ["messages", conversationId],
             (old) => {
@@ -64,16 +63,8 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
             },
           );
 
-          // Still invalidate to ensure synchronization
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
 
-          // Disabled to prevent wiping the optimistically added message
-          // with a potentially stale background fetch response
-          // queryClient.invalidateQueries({
-          //  queryKey: ["messages", conversationId],
-          // });
-
-          // If message is from someone else and this chat isn't currently open, update unread count
           const {
             data: { user },
           } = await supabase.auth.getUser();
@@ -92,11 +83,8 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
-          // E.g. message getting marked as read
-          // queryClient.invalidateQueries({
-          //   queryKey: ["messages", conversationId],
-          // });
+        () => {
+          // handled by optimistic updates in chat-window
         },
       )
       .subscribe();

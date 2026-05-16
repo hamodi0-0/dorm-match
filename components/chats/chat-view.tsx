@@ -1,23 +1,77 @@
 "use client";
 
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useConversations } from "@/hooks/use-conversations";
+import { fetchMessages } from "@/hooks/use-messages";
 import { ChatSidebar } from "./chat-sidebar";
 import { ChatWindow } from "./chat-window";
-import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
 import { useChatStore } from "@/lib/stores/chat-store";
 import { MessageSquare } from "lucide-react";
-import { PageLoader } from "../ui/page-loader";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function ConversationRowSkeleton() {
+  return (
+    <div className="flex items-start gap-3 p-4 border-b border-border/50">
+      <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-12" />
+        </div>
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-3 w-36" />
+      </div>
+    </div>
+  );
+}
+
+function ChatViewSkeleton() {
+  return (
+    <div
+      className="flex w-full overflow-hidden bg-background border-y sm:border sm:rounded-xl sm:my-6 sm:mx-auto sm:max-w-6xl shadow-sm"
+      style={{
+        height: "calc(100vh - 220px)",
+        minHeight: "500px",
+        maxHeight: "800px",
+      }}
+    >
+      <div className="w-full md:w-80 lg:w-96 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border shrink-0">
+          <Skeleton className="h-6 w-24" />
+        </div>
+        <div className="flex-1">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ConversationRowSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+      <div className="hidden md:flex flex-1 flex-col items-center justify-center p-8 gap-4">
+        <Skeleton className="h-20 w-20 rounded-2xl" />
+        <Skeleton className="h-6 w-52" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+interface ChatViewProps {
+  conversationId?: string;
+  basePath: string;
+  currentUserId: string;
+}
 
 export function ChatView({
   conversationId,
   basePath,
-}: {
-  conversationId?: string;
-  basePath: string;
-}) {
+  currentUserId,
+}: ChatViewProps) {
+  const queryClient = useQueryClient();
   const { data: conversations, isLoading } = useConversations();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { setActiveConversationId } = useChatStore();
 
   useEffect(() => {
@@ -25,17 +79,20 @@ export function ChatView({
     return () => setActiveConversationId(null);
   }, [conversationId, setActiveConversationId]);
 
+  // Prefetch messages for all conversations so clicking any is instant
   useEffect(() => {
-    async function getUser() {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      setCurrentUserId(data.user?.id || null);
-    }
-    getUser();
-  }, []);
+    if (!conversations?.length) return;
+    conversations.forEach((conv) => {
+      queryClient.prefetchQuery({
+        queryKey: ["messages", conv.id],
+        queryFn: () => fetchMessages(conv.id),
+        staleTime: 0,
+      });
+    });
+  }, [conversations, queryClient]);
 
-  if (isLoading || !currentUserId) {
-    return <PageLoader className="min-h-[50vh]" />;
+  if (isLoading) {
+    return <ChatViewSkeleton />;
   }
 
   const activeConversation = conversations?.find(
@@ -51,9 +108,11 @@ export function ChatView({
         maxHeight: "800px",
       }}
     >
-      {/* Sidebar - hidden on mobile if a conversation is active */}
+      {/* Sidebar */}
       <div
-        className={`w-full md:w-80 lg:w-96 border-r border-border flex flex-col ${conversationId ? "hidden md:flex" : "flex"}`}
+        className={`w-full md:w-80 lg:w-96 border-r border-border flex flex-col ${
+          conversationId ? "hidden md:flex" : "flex"
+        }`}
       >
         <ChatSidebar
           conversations={conversations || []}
@@ -63,9 +122,11 @@ export function ChatView({
         />
       </div>
 
-      {/* Main Chat Area */}
+      {/* Main area */}
       <div
-        className={`flex-1 flex flex-col min-w-0 min-h-0 ${!conversationId ? "hidden md:flex" : "flex"}`}
+        className={`flex-1 flex flex-col min-w-0 min-h-0 ${
+          !conversationId ? "hidden md:flex" : "flex"
+        }`}
       >
         {conversationId && activeConversation ? (
           <ChatWindow

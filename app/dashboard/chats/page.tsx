@@ -1,9 +1,15 @@
+// app/dashboard/chats/page.tsx
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { ChatView } from "@/components/chats/chat-view";
 
-export const metadata = {
-  title: "Chats | Dormr",
-};
+export const metadata = { title: "Chats | Dormr" };
 
-export default function ChatsPage() {
-  return <ChatView basePath="/dashboard/chats" />;
+export default async function ChatsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/");
+  return <ChatView basePath="/dashboard/chats" currentUserId={user.id} />;
 }
