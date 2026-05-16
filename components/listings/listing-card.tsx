@@ -24,24 +24,13 @@ import {
 import { getDialablePhone, formatPhoneDisplay } from "@/lib/helpers/phone";
 import { ImageCarousel } from "@/components/listings/image-carousel";
 import { cn } from "@/lib/utils";
-import type { Listing } from "@/lib/types/listing";
+import type { ListingCardProps } from "@/lib/types/listing";
 import { ROOM_TYPE_LABELS, BILLING_PERIOD_SUFFIX } from "@/lib/types/listing";
 
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
 import { useCompatibility } from "@/hooks/use-compatibility";
 import { useInitChat } from "@/hooks/use-init-chat";
 import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
-import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
-
-interface ListingCardProps {
-  listing: Listing;
-  tenantProfiles?: TenantCompatibilityProfile[]; // <-- add this
-  viewerProfile?: TenantCompatibilityProfile | null; // <-- add this
-}
-
-// ImageCarousel moved to components/listings/image-carousel.tsx
-
-// ─── Main Card ────────────────────────────────────────────────────────────────
 
 export function ListingCard({
   listing,

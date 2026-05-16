@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { useStudentProfile } from "@/hooks/use-student-profile";
-import {
-  usePublicListingsPage,
-  normalizeFilters,
-} from "@/hooks/use-public-listings-page";
+import { usePublicListingsPage } from "@/hooks/use-public-listings-page";
 import { ListingsFilterBar } from "@/components/listings/listings-filter-bar";
 import { ListingsResults } from "@/components/listings/listings-results";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -15,6 +12,10 @@ import type {
   ListingsBrowseClientProps,
   ListingsFilterChange,
 } from "@/lib/types/listings-browse";
+import {
+  normalizeFilters,
+  computeActiveFilterCount,
+} from "@/lib/helpers/listings";
 
 export function ListingsGridClient({ initialData }: ListingsBrowseClientProps) {
   const [page, setPage] = useState(1);
@@ -75,16 +76,15 @@ export function ListingsGridClient({ initialData }: ListingsBrowseClientProps) {
     !!filters.roomType ||
     filters.maxPrice !== null ||
     !!filters.genderPreference;
+
   const isSuggestedView = page === 1 && !hasActiveFilters;
+
   const isOutOfRangePage = totalCount > 0 && listings.length === 0 && page > 1;
+
   const showNoSearchResults =
     !isFetching && listings.length === 0 && filters.search.length > 0;
-  const activeFilterCount = [
-    filters.search,
-    filters.roomType,
-    filters.maxPrice !== null ? true : false,
-    filters.genderPreference,
-  ].filter(Boolean).length;
+
+  const activeFilterCount = computeActiveFilterCount(filters);
 
   return (
     <div className="flex-1 flex flex-col min-h-0">

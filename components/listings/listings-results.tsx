@@ -7,21 +7,7 @@ import { ListingsBrowseSkeleton } from "./listings-browse-skeleton";
 import { ListingsBrowsePagination } from "./listings-browse-pagination";
 import { ListingCard } from "@/components/listings/listing-card";
 import { cn } from "@/lib/utils";
-import type { Listing } from "@/lib/types/listing";
-import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
-import type { ListingsPaginationProps } from "@/lib/types/listings-browse";
-import { StudentProfile } from "@/hooks/use-student-profile";
-
-interface ResultsProps extends ListingsPaginationProps {
-  listings: Listing[];
-  tenantProfiles: Record<string, TenantCompatibilityProfile[]>;
-  viewerProfile: StudentProfile | null | undefined;
-  isFetching: boolean;
-  isPlaceholderData: boolean;
-  isSuggestedView: boolean;
-  isOutOfRangePage: boolean;
-  showNoSearchResults: boolean;
-}
+import type { ResultsProps } from "@/lib/types/listing";
 
 export function ListingsResults({
   listings,
