@@ -91,7 +91,7 @@ export function ListerNotificationItem({ item }: ListerNotificationItemProps) {
 
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
             <GraduationCap className="h-3 w-3 shrink-0" />
-            <span className="truncate">
+            <span>
               {item.requesterMajor} · {item.requesterUniversity}
             </span>
           </div>
