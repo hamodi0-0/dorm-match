@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Conversation, Message } from "@/lib/types/chat";
+import { ChatWindowProps, Message } from "@/lib/types/chat";
 import { useMessages } from "@/hooks/use-messages";
 import { MessageInput } from "./message-input";
 import { createClient } from "@/lib/supabase/client";
@@ -13,36 +13,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useChatStore } from "@/lib/stores/chat-store";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MessagesSkeleton } from "./messages-skeleton";
 
-interface ChatWindowProps {
-  conversation: Conversation;
-  currentUserId: string;
-  basePath: string;
-}
-
-function MessagesSkeleton() {
-  return (
-    <div className="flex-1 overflow-hidden p-4 flex flex-col gap-4">
-      <div className="self-end flex flex-col items-end gap-1">
-        <Skeleton className="h-9 w-24 rounded-2xl rounded-br-sm" />
-        <Skeleton className="h-3 w-12" />
-      </div>
-      <div className="self-start flex flex-col items-start gap-1">
-        <Skeleton className="h-9 w-40 rounded-2xl rounded-bl-sm" />
-        <Skeleton className="h-3 w-12" />
-      </div>
-      <div className="self-end flex flex-col items-end gap-1">
-        <Skeleton className="h-9 w-32 rounded-2xl rounded-br-sm" />
-        <Skeleton className="h-3 w-12" />
-      </div>
-      <div className="self-start flex flex-col items-start gap-1">
-        <Skeleton className="h-9 w-48 rounded-2xl rounded-bl-sm" />
-        <Skeleton className="h-3 w-12" />
-      </div>
-    </div>
-  );
-}
+// Messages skeleton moved to components/chats/messages-skeleton.tsx
 
 export function ChatWindow({
   conversation,
