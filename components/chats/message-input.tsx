@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Message, MessageInputProps } from "@/lib/types/chat";
+import { Message } from "@/lib/types/chat";
+import { encryptMessage, getConversationKey } from "@/lib/crypto";
+
+interface MessageInputProps {
+  conversationId: string;
+  currentUserId: string;
+}
 
 export function MessageInput({
   conversationId,
@@ -24,7 +30,7 @@ export function MessageInput({
     setContent("");
     setIsSending(true);
 
-    // Optimistic UI Update
+    // Optimistic update with plaintext — user sees their message immediately
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: Message = {
       id: tempId,
@@ -47,41 +53,48 @@ export function MessageInput({
     try {
       const supabase = createClient();
 
+      // Encrypt before writing to DB
+      const key = await getConversationKey(conversationId);
+      const encryptedContent = await encryptMessage(messageContent, key);
+
       const { data: newMessage, error } = await supabase
         .from("messages")
         .insert({
           conversation_id: conversationId,
           sender_id: currentUserId,
-          content: messageContent,
+          content: encryptedContent, // ciphertext goes to DB
         })
         .select()
         .single();
 
       if (error) {
         console.error("Error sending message:", error);
-        // Revert optimistic update
         queryClient.setQueryData(
           ["messages", conversationId],
           previousMessages,
         );
-        // Put the content back so the user doesn't lose it
         setContent(messageContent);
       } else {
-        // Swap temp message with real message
+        // Swap temp ID for real ID — keep the original plaintext, not the encrypted blob
         queryClient.setQueryData<Message[]>(
           ["messages", conversationId],
           (old) => {
-            if (!old) return [newMessage];
-            return old.map((m) => (m.id === tempId ? newMessage : m));
+            if (!old) return [{ ...newMessage, content: messageContent }];
+            return old.map((m) =>
+              m.id === tempId ? { ...newMessage, content: messageContent } : m,
+            );
           },
         );
 
-        // Also update the updated_at on the conversation so it moves to top
         await supabase
           .from("conversations")
           .update({ updated_at: new Date().toISOString() })
           .eq("id", conversationId);
       }
+    } catch (err) {
+      console.error("Error encrypting/sending message:", err);
+      queryClient.setQueryData(["messages", conversationId], previousMessages);
+      setContent(messageContent);
     } finally {
       setIsSending(false);
     }

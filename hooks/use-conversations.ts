@@ -4,6 +4,11 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { Conversation, Message } from "@/lib/types/chat";
+import {
+  getConversationKey,
+  preloadConversationKeys,
+  tryDecryptMessage,
+} from "@/lib/crypto";
 
 async function fetchConversations(): Promise<Conversation[]> {
   const supabase = createClient();
@@ -58,34 +63,59 @@ async function fetchConversations(): Promise<Conversation[]> {
   const studentMap = new Map((studentProfilesData || []).map((p) => [p.id, p]));
   const listerMap = new Map((listerProfilesData || []).map((p) => [p.id, p]));
 
-  const enrichedConversations = conversationsData.map((conv) => {
-    const student = studentMap.get(conv.student_id) || {
-      full_name: "Unknown Student",
-      avatar_url: null,
-    };
-    const lister = listerMap.get(conv.lister_id) || {
-      full_name: "Unknown Lister",
-      avatar_url: null,
-    };
-    const listing = Array.isArray(conv.listing)
-      ? conv.listing[0]
-      : conv.listing;
+  // Preload all conversation keys in one API call before building the list
+  try {
+    await preloadConversationKeys(conversationIds);
+  } catch {
+    // Non-fatal: sidebar previews will fall back to raw ciphertext
+  }
 
-    const convMessages = messages.filter((m) => m.conversation_id === conv.id);
-    const lastMessage = convMessages[0];
-    const unreadCount = convMessages.filter(
-      (m) => m.sender_id !== user.id && m.read_at === null,
-    ).length;
+  const enrichedConversations = await Promise.all(
+    conversationsData.map(async (conv) => {
+      const student = studentMap.get(conv.student_id) || {
+        full_name: "Unknown Student",
+        avatar_url: null,
+      };
+      const lister = listerMap.get(conv.lister_id) || {
+        full_name: "Unknown Lister",
+        avatar_url: null,
+      };
+      const listing = Array.isArray(conv.listing)
+        ? conv.listing[0]
+        : conv.listing;
 
-    return {
-      ...conv,
-      student,
-      lister,
-      listing,
-      last_message: lastMessage,
-      unread_count: unreadCount,
-    };
-  });
+      const convMessages = messages.filter(
+        (m) => m.conversation_id === conv.id,
+      );
+      const rawLastMessage = convMessages[0];
+      const unreadCount = convMessages.filter(
+        (m) => m.sender_id !== user.id && m.read_at === null,
+      ).length;
+
+      // Decrypt the sidebar preview (key is already cached from preloadConversationKeys)
+      let lastMessage = rawLastMessage;
+      if (rawLastMessage) {
+        try {
+          const key = await getConversationKey(conv.id);
+          lastMessage = {
+            ...rawLastMessage,
+            content: await tryDecryptMessage(rawLastMessage.content, key),
+          };
+        } catch {
+          // fallback: use raw
+        }
+      }
+
+      return {
+        ...conv,
+        student,
+        lister,
+        listing,
+        last_message: lastMessage,
+        unread_count: unreadCount,
+      };
+    }),
+  );
 
   return enrichedConversations as Conversation[];
 }
@@ -112,21 +142,30 @@ export function useConversations(initialData?: Conversation[]) {
           schema: "public",
           table: "messages",
         },
-        (payload) => {
+        async (payload) => {
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
 
-          if (
-            payload.eventType === "INSERT" &&
-            payload.new &&
-            (payload.new as Record<string, unknown>)["conversation_id"]
-          ) {
-            const newMsg = payload.new as Message;
+          if (payload.eventType === "INSERT" && payload.new) {
+            const rawMsg = payload.new as Message;
+
+            // Decrypt before injecting into the messages cache
+            let decryptedMsg = rawMsg;
+            try {
+              const key = await getConversationKey(rawMsg.conversation_id);
+              decryptedMsg = {
+                ...rawMsg,
+                content: await tryDecryptMessage(rawMsg.content, key),
+              };
+            } catch {
+              // fallback: use raw
+            }
+
             queryClient.setQueryData<Message[]>(
-              ["messages", newMsg.conversation_id],
+              ["messages", decryptedMsg.conversation_id],
               (old) => {
-                if (!old) return [newMsg];
-                if (old.some((m) => m.id === newMsg.id)) return old;
-                return [...old, newMsg];
+                if (!old) return [decryptedMsg];
+                if (old.some((m) => m.id === decryptedMsg.id)) return old;
+                return [...old, decryptedMsg];
               },
             );
           }

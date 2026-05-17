@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { Message } from "@/lib/types/chat";
 import { useChatStore } from "@/lib/stores/chat-store";
+import { getConversationKey, tryDecryptMessage } from "@/lib/crypto";
 
 export async function fetchMessages(
   conversationId: string,
@@ -21,7 +22,19 @@ export async function fetchMessages(
     return [];
   }
 
-  return data as Message[];
+  const messages = data as Message[];
+
+  try {
+    const key = await getConversationKey(conversationId);
+    return await Promise.all(
+      messages.map(async (msg) => ({
+        ...msg,
+        content: await tryDecryptMessage(msg.content, key),
+      })),
+    );
+  } catch {
+    return messages; // fallback: return without decrypting
+  }
 }
 
 export function useMessages(conversationId: string, initialData?: Message[]) {
@@ -52,14 +65,26 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          const newMessage = payload.new as Message;
+          const rawMessage = payload.new as Message;
+
+          // Decrypt before adding to cache
+          let decryptedMessage = rawMessage;
+          try {
+            const key = await getConversationKey(conversationId);
+            decryptedMessage = {
+              ...rawMessage,
+              content: await tryDecryptMessage(rawMessage.content, key),
+            };
+          } catch {
+            // fallback: use raw
+          }
 
           queryClient.setQueryData<Message[]>(
             ["messages", conversationId],
             (old) => {
-              if (!old) return [newMessage];
-              if (old.some((m) => m.id === newMessage.id)) return old;
-              return [...old, newMessage];
+              if (!old) return [decryptedMessage];
+              if (old.some((m) => m.id === decryptedMessage.id)) return old;
+              return [...old, decryptedMessage];
             },
           );
 
@@ -68,7 +93,7 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
           const {
             data: { user },
           } = await supabase.auth.getUser();
-          if (user && newMessage.sender_id !== user.id) {
+          if (user && rawMessage.sender_id !== user.id) {
             if (activeConversationId !== conversationId) {
               incrementUnreadCount();
             }
@@ -84,7 +109,7 @@ export function useMessages(conversationId: string, initialData?: Message[]) {
           filter: `conversation_id=eq.${conversationId}`,
         },
         () => {
-          // handled by optimistic updates in chat-window
+          // handled optimistically in chat-window
         },
       )
       .subscribe();
