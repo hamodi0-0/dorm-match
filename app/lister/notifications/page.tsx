@@ -3,11 +3,7 @@ import { redirect } from "next/navigation";
 import { ListerDashboardHeader } from "@/components/lister/lister-dashboard-header";
 import { ListerNotificationsClient } from "@/components/notifications/notifications-client";
 import type { ListerNotificationItem } from "@/hooks/use-notifications";
-
-function normaliseSingle<T>(val: T | T[] | null): T | null {
-  if (!val) return null;
-  return Array.isArray(val) ? (val[0] ?? null) : val;
-}
+import { normaliseSingle } from "@/lib/helpers/notifications";
 
 export default async function ListerNotificationsPage() {
   const supabase = await createClient();

@@ -2,12 +2,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChatView } from "@/components/chats/chat-view";
+import { ChatIdPageProps } from "@/lib/types/chat";
 
 export const metadata = { title: "Chat | Dormr" };
-
-interface ChatIdPageProps {
-  params: Promise<{ id: string }>;
-}
 
 export default async function ChatIdPage({ params }: ChatIdPageProps) {
   const { id } = await params;

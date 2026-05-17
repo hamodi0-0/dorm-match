@@ -6,12 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Message } from "@/lib/types/chat";
-
-interface MessageInputProps {
-  conversationId: string;
-  currentUserId: string;
-}
+import { Message, MessageInputProps } from "@/lib/types/chat";
 
 export function MessageInput({
   conversationId,

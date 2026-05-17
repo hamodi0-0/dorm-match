@@ -1,18 +1,11 @@
 "use client";
 
-import { Conversation } from "@/lib/types/chat";
+import { ChatSidebarProps } from "@/lib/types/chat";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageSquare } from "lucide-react";
-
-interface ChatSidebarProps {
-  conversations: Conversation[];
-  activeId?: string;
-  currentUserId: string;
-  basePath: string;
-}
 
 export function ChatSidebar({
   conversations,
@@ -27,7 +20,7 @@ export function ChatSidebar({
           <MessageSquare className="h-10 w-10 text-muted-foreground" />
         </div>
         <h2 className="mt-6 text-lg font-semibold">Nothing here yet</h2>
-        <p className="mt-2 text-center text-sm leading-6 text-muted-foreground max-w-[200px]">
+        <p className="mt-2 text-center text-sm leading-6 text-muted-foreground max-w-50">
           No conversations yet.
         </p>
       </div>

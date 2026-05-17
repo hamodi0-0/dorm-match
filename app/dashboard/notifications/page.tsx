@@ -2,11 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { StudentNotificationsClient } from "@/components/notifications/notifications-client";
 import type { StudentNotificationItem } from "@/hooks/use-notifications";
-
-function normaliseSingle<T>(val: T | T[] | null): T | null {
-  if (!val) return null;
-  return Array.isArray(val) ? (val[0] ?? null) : val;
-}
+import { normaliseSingle } from "@/lib/helpers/notifications";
 
 export default async function StudentNotificationsPage() {
   const supabase = await createClient();

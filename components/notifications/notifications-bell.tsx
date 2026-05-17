@@ -4,12 +4,7 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-interface NotificationBellProps {
-  href: string;
-  count?: number;
-  className?: string;
-}
+import { NotificationBellProps } from "@/lib/types/notifications";
 
 export function NotificationBell({
   href,
