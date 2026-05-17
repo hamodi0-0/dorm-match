@@ -103,7 +103,7 @@ export function MessageInput({
   return (
     <form
       onSubmit={handleSend}
-      className="p-4 border-t border-border flex items-center gap-2 bg-background shrink-0"
+      className="p-4 border-t mx-2 rounded-xl border-border flex items-center gap-2 bg-background shrink-0"
     >
       <Input
         value={content}

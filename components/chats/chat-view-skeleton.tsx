@@ -8,7 +8,7 @@ export function ChatViewSkeleton() {
     <div
       className="flex w-full overflow-hidden bg-background border-y sm:border sm:rounded-xl sm:my-6 sm:mx-auto sm:max-w-6xl shadow-sm"
       style={{
-        height: "calc(100vh - 220px)",
+        height: "calc(100vh - 100px)",
         minHeight: "500px",
         maxHeight: "800px",
       }}
