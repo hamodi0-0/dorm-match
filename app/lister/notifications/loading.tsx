@@ -44,7 +44,7 @@ function SectionSkeleton({ count = 2 }: { count?: number }) {
 
 export default function NotificationsLoading() {
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto w-full">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-2xl min-w-0 mx-auto w-full">
       {/* Title */}
       <div className="mb-6 space-y-1.5">
         <Skeleton className="h-9 w-40" />

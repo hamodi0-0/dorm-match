@@ -29,10 +29,10 @@ export function ChatSidebar({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border shrink-0">
+      <div className="p-4 pb-7 border-b border-border shrink-0">
         <h2 className="text-lg font-semibold font-serif">Messages</h2>
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto pb-2 px-2">
         {conversations.map((conv) => {
           // Identify the 'other' person
           const isStudent = conv.student_id === currentUserId;
@@ -48,7 +48,7 @@ export function ChatSidebar({
               key={conv.id}
               href={`${basePath}/${conv.id}`}
               className={cn(
-                "flex items-start gap-3 p-4 border-b border-border/50 hover:bg-muted/50 transition-colors rounded-xl",
+                "flex items-start gap-3 p-4 my-2 border-b border-border/50 hover:bg-muted/50 transition-colors rounded-xl",
                 isActive && "bg-muted",
               )}
             >
