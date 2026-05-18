@@ -31,11 +31,9 @@ export interface StudentProfile {
 
 async function fetchStudentProfile(): Promise<StudentProfile | null> {
   const supabase = createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -44,19 +42,16 @@ async function fetchStudentProfile(): Promise<StudentProfile | null> {
     .eq("id", user.id)
     .single();
 
-  if (error || !data) {
-    throw new Error(error?.message || "Profile not found");
-  }
-
+  if (error || !data) throw new Error(error?.message || "Profile not found");
   return data as StudentProfile;
 }
 
-export function useStudentProfile() {
+export function useStudentProfile(initialData?: StudentProfile | null) {
   return useQuery<StudentProfile | null>({
-    // Explicitly binding the cache to the user's ID protects data integrity
     queryKey: ["student-profile"],
     queryFn: fetchStudentProfile,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    initialData: initialData ?? undefined,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
