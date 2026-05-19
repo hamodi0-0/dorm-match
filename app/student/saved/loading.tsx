@@ -1,16 +1,12 @@
-import ListingCardSkeleton from "@/components/listings/listing-card-skeleton";
+import { ListingsBrowseSkeleton } from "@/components/listings/listings-browse-skeleton";
 
 export default function SavedLoading() {
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 w-full">
+    <main className="flex-1 px-4 sm:px-6 py-5 max-w-5xl mx-auto w-full mb-20">
       <h1 className="text-2xl font-serif font-bold text-foreground mb-6">
         Saved Listings
       </h1>
-      <div className="grid grid-cols-1 gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <ListingCardSkeleton key={i} />
-        ))}
-      </div>
-    </div>
+      <ListingsBrowseSkeleton count={3} />
+    </main>
   );
 }

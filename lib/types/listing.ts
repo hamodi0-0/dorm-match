@@ -107,6 +107,18 @@ export interface SavedListing {
   listing?: Listing; // often joined
 }
 
+export interface SavedListingWithDetails extends SavedListing {
+  listing: Listing;
+}
+
+export interface SavedListingQueryRow {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  created_at: string;
+  listing: Listing | Listing[] | null;
+}
+
 export interface ListingTenant {
   id: string;
   listing_id: string;

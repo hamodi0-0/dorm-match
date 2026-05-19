@@ -2,15 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import type { Listing } from "@/lib/types/listing";
-
-export interface SavedListingWithDetails {
-  id: string;
-  user_id: string;
-  listing_id: string;
-  created_at: string;
-  listing: Listing;
-}
+import type {
+  SavedListingQueryRow,
+  SavedListingWithDetails,
+} from "@/lib/types/listing";
 
 export function useSavedListingsQuery() {
   const supabase = createClient();
@@ -43,11 +38,21 @@ export function useSavedListingsQuery() {
 
       if (error) throw error;
 
-      // Ensure data is structured properly due to array joins in generic typed responses
-      return (data as any[]).map((row) => ({
-        ...row,
-        listing: Array.isArray(row.listing) ? row.listing[0] : row.listing,
-      })) as SavedListingWithDetails[];
+      return (data ?? [])
+        .map((row) => {
+          const savedRow = row as SavedListingQueryRow;
+          const listing = Array.isArray(savedRow.listing)
+            ? savedRow.listing[0]
+            : savedRow.listing;
+
+          if (!listing) return null;
+
+          return {
+            ...savedRow,
+            listing,
+          };
+        })
+        .filter((row): row is SavedListingWithDetails => row !== null);
     },
   });
 }
