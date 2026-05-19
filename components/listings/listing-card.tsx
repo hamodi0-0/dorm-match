@@ -30,7 +30,12 @@ import { ROOM_TYPE_LABELS, BILLING_PERIOD_SUFFIX } from "@/lib/types/listing";
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
 import { useCompatibility } from "@/hooks/use-compatibility";
 import { useInitChat } from "@/hooks/use-init-chat";
+import {
+  useSavedListingsQuery,
+  useToggleSaveListing,
+} from "@/hooks/use-saved-listings";
 import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
+import { toast } from "sonner";
 
 export function ListingCard({
   listing,
@@ -51,6 +56,26 @@ export function ListingCard({
     tenantProfiles ?? [],
   );
   const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
+  const { data: savedListings = [] } = useSavedListingsQuery();
+  const { mutate: toggleSave, isPending: isToggleSavePending } =
+    useToggleSaveListing();
+
+  const isSaved = savedListings.some((sl) => sl.listing_id === listing.id);
+
+  const handleToggleSave = () => {
+    toggleSave(
+      { listingId: listing.id, isSaved },
+      {
+        onError: (err) => {
+          toast.error(
+            err instanceof Error
+              ? err.message
+              : "Failed to update saved status",
+          );
+        },
+      },
+    );
+  };
 
   const dialablePhone = listing.contact_phone
     ? getDialablePhone(listing.contact_phone)
@@ -64,7 +89,7 @@ export function ListingCard({
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          "bg-card border border-border rounded-xl overflow-hidden my-2",
+          "bg-card border border-border rounded-xl overflow-hidden my-2 w-full",
           "shadow-sm hover:shadow-md transition-all duration-200",
           "flex flex-col",
         )}
@@ -72,7 +97,7 @@ export function ListingCard({
         {/* ── Card body: image + content ─────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
-          <div className="relative w-full sm:w-72 lg:w-80 xl:w-88 shrink-0 h-52 sm:h-56 bg-muted">
+          <div className="relative w-full sm:w-1/2 lg:w-2/5 shrink-0 h-52 sm:h-56 bg-muted">
             <ImageCarousel
               images={images}
               listingId={listing.id}
@@ -204,13 +229,23 @@ export function ListingCard({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-                  disabled
+                  onClick={handleToggleSave}
+                  disabled={isToggleSavePending}
+                  className={cn(
+                    "h-8 w-8 transition-colors",
+                    isSaved
+                      ? "text-rose-500 bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40"
+                      : "text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20",
+                  )}
                 >
-                  <Heart className="h-3.5 w-3.5" />
+                  <Heart
+                    className={cn("h-3.5 w-3.5", isSaved && "fill-current")}
+                  />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Save listing (coming soon)</TooltipContent>
+              <TooltipContent>
+                {isSaved ? "Remove from saved" : "Save listing"}
+              </TooltipContent>
             </Tooltip>
           </div>
         </div>
