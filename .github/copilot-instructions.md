@@ -2,7 +2,7 @@
 
 **Dormr** is a student housing marketplace (proptech) that matches university students with compatible accommodations. Two distinct user roles with separate dashboards:
 
-- **Students** (`/dashboard/`): Browse listings, submit tenant requests, manage profiles, view compatibility scores
+- **Students** (`/student/`): Browse listings, submit tenant requests, manage profiles, view compatibility scores
 - **Listers** (`/lister/`): Post rooms, manage listings, approve/reject tenant requests, view applications
 
 Core features: listing CRUD, tenant request→approval→notification flows, real-time compatibility scoring, notifications, student profiles with inline editing.
@@ -27,7 +27,7 @@ lib/
 └── supabase/        # Supabase clients (client.ts for browser, server.ts for RSC)
 hooks/              # React Query + business logic (use-*.ts naming)
 components/
-├── dashboard/       # Student dashboard (profile, listings-browse, notifications)
+├── dashboard/       # Student routes (profile, listings-browse, notifications)
 ├── lister/         # Lister dashboard (my-listings, listing-form)
 └── ui/             # shadcn/ui components
 app/
@@ -184,7 +184,7 @@ npm run lint         # ESLint check
 
 - `hooks/use-public-listings-page.ts`: Listing query with pagination, filters, tenant profile batching
 - `components/listings/listing-form.tsx`: Complex form with image upload, location picker (Leaflet), React Hook Form
-- `app/dashboard/page.tsx`: Server component with auth guard, initial data fetch pattern
+- `app/student/page.tsx`: Server component with auth guard, initial data fetch pattern
 - `lib/stores/listing-filters-store.ts`: Zustand store example
 - `lib/schemas/listing-schema.ts`: Zod schema organization
 - `hooks/use-student-profile.ts`: React Query with initialData + inline editing

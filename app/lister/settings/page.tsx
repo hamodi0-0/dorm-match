@@ -20,7 +20,7 @@ export default async function ListerSettingsPage() {
   if (!user) redirect("/");
 
   if (user.user_metadata?.user_type !== "lister") {
-    redirect("/dashboard");
+    redirect("/student/dashboard");
   }
 
   return (

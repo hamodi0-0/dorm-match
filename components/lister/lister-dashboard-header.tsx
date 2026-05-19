@@ -148,7 +148,7 @@ export function ListerDashboardHeader({ title }: ListerDashboardHeaderProps) {
       setSwitchDialogOpen(false);
       setStudentEmail("");
       setStudentPassword("");
-      router.push("/dashboard");
+      router.push("/student/dashboard");
       router.refresh();
     } catch (err) {
       toast.error(

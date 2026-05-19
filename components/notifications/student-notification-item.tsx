@@ -16,7 +16,7 @@ export function StudentNotificationItem({
 
   return (
     <Link
-      href={`/dashboard/listings/${item.listingId}`}
+      href={`/student/listings/${item.listingId}`}
       className="flex items-start gap-3 px-4 py-4 hover:bg-accent/50 transition-colors group relative"
     >
       {isUnread && (

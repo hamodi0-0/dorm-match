@@ -34,21 +34,21 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard/listings", label: "Browse Listings", icon: Building2 },
+  { href: "/student/listings", label: "Browse Listings", icon: Building2 },
   {
-    href: "/dashboard/chats",
+    href: "/student/chats",
     label: "Chats",
     icon: MessageSquare,
   },
   {
-    href: "/dashboard/saved",
+    href: "/student/saved",
     label: "Saved Dorms",
     icon: Heart,
     badge: "Soon",
   },
 
   {
-    href: "/dashboard/settings",
+    href: "/student/settings",
     label: "Settings",
     icon: Settings,
     badge: "Soon",
@@ -101,7 +101,7 @@ export function DashboardSidebar() {
             isOpen ? "px-5" : "justify-center px-0",
           )}
         >
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link href="/student/dashboard" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
               <Building2 className="h-4 w-4 text-primary-foreground" />
             </div>
@@ -123,8 +123,8 @@ export function DashboardSidebar() {
           <ul className={cn("space-y-0.5", isOpen ? "px-3" : "px-2")}>
             {NAV_ITEMS.map((item) => {
               const isActive =
-                item.href === "/dashboard"
-                  ? pathname === "/dashboard"
+                item.href === "/student/dashboard"
+                  ? pathname === "/student/dashboard"
                   : pathname.startsWith(item.href);
               const Icon = item.icon;
 
@@ -154,13 +154,13 @@ export function DashboardSidebar() {
                   {isOpen && (
                     <>
                       <span className="flex-1 truncate">{item.label}</span>
-                      {item.href === "/dashboard/chats" &&
+                      {item.href === "/student/chats" &&
                         unreadChatCount > 0 && (
                           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
                             {unreadChatCount}
                           </div>
                         )}
-                      {item.badge && item.href !== "/dashboard/chats" && (
+                      {item.badge && item.href !== "/student/chats" && (
                         <Badge
                           variant="secondary"
                           className="text-xs px-1.5 py-0 h-5"
@@ -183,13 +183,13 @@ export function DashboardSidebar() {
                         className="flex items-center gap-2"
                       >
                         {item.label}
-                        {item.href === "/dashboard/chats" &&
+                        {item.href === "/student/chats" &&
                           unreadChatCount > 0 && (
                             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
                               {unreadChatCount}
                             </div>
                           )}
-                        {item.badge && item.href !== "/dashboard/chats" && (
+                        {item.badge && item.href !== "/student/chats" && (
                           <Badge
                             variant="secondary"
                             className="text-xs px-1.5 py-0 h-5"
@@ -218,7 +218,7 @@ export function DashboardSidebar() {
           {/* User Info */}
           {isOpen ? (
             <Link
-              href="/dashboard/profile"
+              href="/student/profile"
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-sidebar-accent/60 transition-colors group"
             >
               {isLoading ? (
@@ -255,7 +255,7 @@ export function DashboardSidebar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/profile"
+                  href="/student/profile"
                   className="flex justify-center py-2"
                 >
                   {isLoading ? (

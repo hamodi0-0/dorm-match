@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { StudentNavHeader } from "@/components/dashboard/student-nav-header";
+import { StudentNavHeader } from "@/components/student/student-nav-header";
 import { Footer } from "@/components/footer";
 
 export default async function DashboardLayout({

@@ -132,7 +132,7 @@ export default function OnboardingPage() {
 
       toast.success("Profile created successfully!");
       resetOnboarding();
-      router.push("/dashboard");
+      router.push("/student/dashboard");
       router.refresh();
     } catch (error) {
       console.error("Error saving profile:", error);

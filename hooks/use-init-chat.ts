@@ -58,7 +58,7 @@ export function useInitChat() {
       return newConv.id;
     },
     onSuccess: (conversationId) => {
-      router.push(`/dashboard/chats/${conversationId}`);
+      router.push(`/student/chats/${conversationId}`);
     },
   });
 }

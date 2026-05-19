@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { DashboardHomeClient } from "@/components/dashboard/dashboard-home-client";
+import { DashboardHomeClient } from "@/components/student/dashboard-home-client";
 import type { StudentProfile } from "@/hooks/use-student-profile";
 import type {
   RecentConversation,

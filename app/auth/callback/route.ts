@@ -88,6 +88,6 @@ export async function GET(request: Request) {
     );
   }
 
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard";
+  const next = requestUrl.searchParams.get("next") ?? "/student/dashboard";
   return NextResponse.redirect(new URL(next, requestUrl.origin));
 }

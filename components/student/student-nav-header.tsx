@@ -79,18 +79,18 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard/listings", label: "Browse Listings", icon: Building2 },
-  { href: "/dashboard/chats", label: "Chats", icon: MessageSquare },
-  { href: "/dashboard/saved", label: "Saved", icon: Heart },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/student/listings", label: "Browse Listings", icon: Building2 },
+  { href: "/student/chats", label: "Chats", icon: MessageSquare },
+  { href: "/student/saved", label: "Saved", icon: Heart },
+  { href: "/student/settings", label: "Settings", icon: Settings },
 ];
 
 const MOBILE_NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard/listings", label: "Browse Listings", icon: Building2 },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/chats", label: "Chats", icon: MessageSquare },
-  { href: "/dashboard/saved", label: "Saved", icon: Heart },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/student/listings", label: "Browse Listings", icon: Building2 },
+  { href: "/student/notifications", label: "Notifications", icon: Bell },
+  { href: "/student/chats", label: "Chats", icon: MessageSquare },
+  { href: "/student/saved", label: "Saved", icon: Heart },
+  { href: "/student/settings", label: "Settings", icon: Settings },
 ];
 
 export function StudentNavHeader() {
@@ -127,7 +127,7 @@ export function StudentNavHeader() {
     : "?";
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/student/dashboard") return pathname === "/student/dashboard";
     return pathname.startsWith(href);
   };
 
@@ -172,7 +172,7 @@ export function StudentNavHeader() {
   return (
     <>
       <header className="h-16 border-b border-border bg-background/95 backdrop-blur-sm flex items-center px-4 sm:px-6 shrink-0">
-        <Link href="/dashboard" className="flex items-center shrink-0">
+        <Link href="/student/dashboard" className="flex items-center shrink-0">
           <div className=" bg-primary rounded-lg h-8 w-8 flex items-center mr-2 justify-center shrink-0">
             <Image
               src="/images/transparent-logo.png"
@@ -203,7 +203,7 @@ export function StudentNavHeader() {
                 )}
               >
                 {item.label}
-                {item.href === "/dashboard/chats" && unreadChatCount > 0 && (
+                {item.href === "/student/chats" && unreadChatCount > 0 && (
                   <Badge
                     variant="default"
                     className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center"
@@ -211,7 +211,7 @@ export function StudentNavHeader() {
                     {unreadChatCount}
                   </Badge>
                 )}
-                {item.badge && item.href !== "/dashboard/chats" && (
+                {item.badge && item.href !== "/student/chats" && (
                   <Badge
                     variant="secondary"
                     className="text-[10px] px-1.5 py-0 h-4 font-medium"
@@ -235,7 +235,7 @@ export function StudentNavHeader() {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <NotificationBell
-            href="/dashboard/notifications"
+            href="/student/notifications"
             count={unreadCount}
             className="hidden md:inline-flex"
           />
@@ -261,7 +261,7 @@ export function StudentNavHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem
-                onClick={() => router.push("/dashboard/profile")}
+                onClick={() => router.push("/student/profile")}
               >
                 <User className="h-4 w-4" />
                 View profile
@@ -317,7 +317,7 @@ export function StudentNavHeader() {
       >
         <div className="flex items-center justify-between h-16 px-5 border-b border-border shrink-0">
           <Link
-            href="/dashboard"
+            href="/student/dashboard"
             className="flex items-center gap-2.5"
             onClick={() => setMobileOpen(false)}
           >
@@ -370,7 +370,7 @@ export function StudentNavHeader() {
                   )}
                 />
                 <span className="flex-1">{item.label}</span>
-                {item.href === "/dashboard/notifications" &&
+                {item.href === "/student/notifications" &&
                   unreadCount > 0 && (
                     <Badge
                       variant="default"
@@ -379,7 +379,7 @@ export function StudentNavHeader() {
                       {unreadCount}
                     </Badge>
                   )}
-                {item.href === "/dashboard/chats" && unreadChatCount > 0 && (
+                {item.href === "/student/chats" && unreadChatCount > 0 && (
                   <Badge
                     variant="default"
                     className="h-5 w-5 rounded-full p-0 flex items-center justify-center"
@@ -388,8 +388,8 @@ export function StudentNavHeader() {
                   </Badge>
                 )}
                 {item.badge &&
-                  item.href !== "/dashboard/chats" &&
-                  item.href !== "/dashboard/notifications" && (
+                  item.href !== "/student/chats" &&
+                  item.href !== "/student/notifications" && (
                     <Badge
                       variant="secondary"
                       className="text-[10px] px-1.5 py-0 h-4"
@@ -404,7 +404,7 @@ export function StudentNavHeader() {
 
         <div className="px-3 pb-6 pt-3 border-t border-border shrink-0">
           <Link
-            href="/dashboard/profile"
+            href="/student/profile"
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent/50 transition-colors"
           >

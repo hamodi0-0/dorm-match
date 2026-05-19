@@ -19,7 +19,7 @@ export default function HowItWorks() {
     } else if (!isOnboarded) {
       router.push("/onboarding");
     } else {
-      router.push("/dashboard");
+      router.push("/student/dashboard");
     }
   };
   return (

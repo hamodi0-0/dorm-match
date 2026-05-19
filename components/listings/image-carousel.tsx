@@ -52,7 +52,7 @@ export function ImageCarousel({
 
   if (sorted.length === 0) {
     return (
-      <Link href={`/dashboard/listings/${listingId}`} className="block h-full">
+      <Link href={`/student/listings/${listingId}`} className="block h-full">
         <div className="w-full h-full bg-linear-to-br from-muted to-muted/40 flex items-center justify-center">
           <Home className="h-10 w-10 text-muted-foreground/20" />
         </div>
@@ -63,7 +63,7 @@ export function ImageCarousel({
   return (
     <div className="relative w-full h-full group/carousel overflow-hidden">
       {/* Images */}
-      <Link href={`/dashboard/listings/${listingId}`} className="block h-full">
+      <Link href={`/student/listings/${listingId}`} className="block h-full">
         <div className="relative w-full h-full">
           {sorted.map((img, idx) => (
             <div
