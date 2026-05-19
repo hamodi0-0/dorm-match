@@ -15,3 +15,11 @@ export interface TenantRequestItem {
   status: RequestStatus;
   updated_at: string;
 }
+
+import type { StudentProfile } from "@/hooks/use-student-profile";
+
+export interface DashboardHomeClientProps {
+  initialProfile: StudentProfile | null;
+  recentConversations: RecentConversation[];
+  tenantRequests: TenantRequestItem[];
+}
