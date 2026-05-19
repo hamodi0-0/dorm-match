@@ -17,10 +17,10 @@ import {
 } from "@/hooks/use-student-profile";
 import { useUpdateProfileMutation } from "@/hooks/use-update-profile-mutation";
 import { type ProfileUpdate } from "@/lib/schemas/profile-edit-schema";
-import { EditableField } from "@/components/dashboard/editable-field";
-import { EditableSearchField } from "@/components/dashboard/editable-search-field";
-import { EditableHobbies } from "@/components/dashboard/editable-hobbies";
-import { AvatarUpload } from "@/components/dashboard/avatar-upload";
+import { EditableField } from "@/components/student/editable-field";
+import { EditableSearchField } from "@/components/student/editable-search-field";
+import { EditableHobbies } from "@/components/student/editable-hobbies";
+import { AvatarUpload } from "@/components/student/avatar-upload";
 import { COMMON_MAJORS } from "@/lib/constants";
 import { useUniversitySearch } from "@/hooks/use-university-search";
 

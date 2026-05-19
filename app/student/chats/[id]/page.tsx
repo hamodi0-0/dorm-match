@@ -1,4 +1,4 @@
-// app/dashboard/chats/[id]/page.tsx
+// app/student/chats/[id]/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChatView } from "@/components/chats/chat-view";
@@ -16,7 +16,7 @@ export default async function ChatIdPage({ params }: ChatIdPageProps) {
   return (
     <ChatView
       conversationId={id}
-      basePath="/dashboard/chats"
+      basePath="/student/chats"
       currentUserId={user.id}
     />
   );

@@ -38,7 +38,7 @@ export function DashboardApplications({ requests }: { requests: TenantRequestIte
             My Applications
           </CardTitle>
           <Button asChild variant="ghost" size="sm" className="text-xs h-7 gap-1 shrink-0">
-            <Link href="/dashboard/notifications">
+            <Link href="/student/notifications">
               View all
               <ChevronRight className="h-3 w-3" />
             </Link>
@@ -56,7 +56,7 @@ export function DashboardApplications({ requests }: { requests: TenantRequestIte
               <p className="text-xs text-muted-foreground mt-0.5">Find a listing and request to join as a tenant.</p>
             </div>
             <Button asChild size="sm" className="gap-1.5 mt-1">
-              <Link href="/dashboard/listings">
+              <Link href="/student/listings">
                 Browse Listings
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -69,7 +69,7 @@ export function DashboardApplications({ requests }: { requests: TenantRequestIte
             return (
               <Link
                 key={req.id}
-                href={`/dashboard/listings/${req.listing_id}`}
+                href={`/student/listings/${req.listing_id}`}
                 className={cn(
                   "flex items-center gap-3 px-5 py-4 hover:bg-muted/30 transition-colors",
                   i < requests.length - 1 && "border-b border-border/50"

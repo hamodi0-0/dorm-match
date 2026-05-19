@@ -99,12 +99,12 @@ export async function updateSession(request: NextRequest) {
         // If student tries to access lister routes, redirect to student dashboard
         if (pathname.startsWith("/lister")) {
           const url = request.nextUrl.clone();
-          url.pathname = isOnboarded ? "/dashboard" : "/onboarding";
+          url.pathname = isOnboarded ? "/student/dashboard" : "/onboarding";
           return NextResponse.redirect(url);
         }
 
         // If not onboarded and trying to access dashboard, redirect to onboarding
-        if (!isOnboarded && pathname.startsWith("/dashboard")) {
+        if (!isOnboarded && pathname.startsWith("/student")) {
           const url = request.nextUrl.clone();
           url.pathname = "/onboarding";
           return NextResponse.redirect(url);
@@ -113,14 +113,14 @@ export async function updateSession(request: NextRequest) {
         // If onboarded and trying to access onboarding, redirect to dashboard
         if (isOnboarded && pathname.startsWith("/onboarding")) {
           const url = request.nextUrl.clone();
-          url.pathname = "/dashboard";
+          url.pathname = "/student/dashboard";
           return NextResponse.redirect(url);
         }
 
         // If student opens landing page while logged in, route to app immediately
         if (pathname === "/") {
           const url = request.nextUrl.clone();
-          url.pathname = isOnboarded ? "/dashboard" : "/onboarding";
+          url.pathname = isOnboarded ? "/student/dashboard" : "/onboarding";
           return NextResponse.redirect(url);
         }
       }
@@ -140,7 +140,7 @@ export async function updateSession(request: NextRequest) {
 
         // If lister tries to access student routes, redirect to lister dashboard
         if (
-          pathname.startsWith("/dashboard") ||
+          pathname.startsWith("/student") ||
           pathname.startsWith("/onboarding")
         ) {
           const url = request.nextUrl.clone();

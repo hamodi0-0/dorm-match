@@ -107,7 +107,7 @@ export function ListingCard({
 
             {/* Title */}
             <Link
-              href={`/dashboard/listings/${listing.id}`}
+              href={`/student/listings/${listing.id}`}
               className="group/title"
             >
               <h3 className="text-sm sm:text-base font-semibold text-foreground group-hover/title:text-primary transition-colors leading-snug line-clamp-2">

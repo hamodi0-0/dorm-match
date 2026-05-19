@@ -91,7 +91,7 @@ function StudentSignInForm({ onSuccess }: { onSuccess: () => void }) {
       onSuccess();
 
       if (profile?.profile_completed) {
-        router.push("/dashboard");
+        router.push("/student/dashboard");
       } else {
         document
           .getElementById("how-it-works")

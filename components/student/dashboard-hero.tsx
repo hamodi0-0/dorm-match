@@ -48,7 +48,7 @@ export function DashboardHero({ profile }: { profile: StudentProfile }) {
               placeholder="Search by city, university, or room type…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && router.push("/dashboard/listings")}
+              onKeyDown={(e) => e.key === "Enter" && router.push("/student/listings")}
               className="pl-9 h-10 bg-background/80 dark:bg-background/50 border-border/60"
             />
           </div>
@@ -72,7 +72,7 @@ export function DashboardHero({ profile }: { profile: StudentProfile }) {
           </Select>
           <Button
             className="h-10 gap-2 shrink-0"
-            onClick={() => router.push("/dashboard/listings")}
+            onClick={() => router.push("/student/listings")}
           >
             Search
             <ArrowRight className="h-4 w-4" />

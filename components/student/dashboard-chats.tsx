@@ -18,7 +18,7 @@ export function DashboardChats({ conversations }: { conversations: RecentConvers
             Recent Chats
           </CardTitle>
           <Button asChild variant="ghost" size="sm" className="text-xs h-7 gap-1 shrink-0">
-            <Link href="/dashboard/chats">
+            <Link href="/student/chats">
               All
               <ChevronRight className="h-3 w-3" />
             </Link>
@@ -42,7 +42,7 @@ export function DashboardChats({ conversations }: { conversations: RecentConvers
             return (
               <Link
                 key={conv.id}
-                href={`/dashboard/chats/${conv.id}`}
+                href={`/student/chats/${conv.id}`}
                 className={cn(
                   "flex items-center gap-3 px-5 py-4 hover:bg-muted/30 transition-colors",
                   i < conversations.length - 1 && "border-b border-border/50"

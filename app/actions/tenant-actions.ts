@@ -75,7 +75,7 @@ export async function submitTenantRequest(
     }
   }
 
-  revalidatePath(`/dashboard/listings/${parsed.data.listing_id}`);
+  revalidatePath(`/student/listings/${parsed.data.listing_id}`);
   revalidatePath(`/lister/notifications`);
   return { error: null };
 }
@@ -121,7 +121,7 @@ export async function acceptTenantRequest(
 
   revalidatePath(`/lister/listings/${request.listing_id}/tenants`);
   revalidatePath(`/lister/notifications`);
-  revalidatePath(`/dashboard/notifications`);
+  revalidatePath(`/student/notifications`);
   return { error: null };
 }
 
@@ -158,7 +158,7 @@ export async function rejectTenantRequest(
 
   revalidatePath(`/lister/listings/${request.listing_id}/tenants`);
   revalidatePath(`/lister/notifications`);
-  revalidatePath(`/dashboard/notifications`);
+  revalidatePath(`/student/notifications`);
   return { error: null };
 }
 
@@ -202,7 +202,7 @@ export async function removeTenant(
     .eq("status", "accepted");
 
   revalidatePath(`/lister/listings/${listingId}/tenants`);
-  revalidatePath(`/dashboard/notifications`);
+  revalidatePath(`/student/notifications`);
   return { error: null };
 }
 
