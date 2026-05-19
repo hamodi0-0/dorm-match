@@ -35,16 +35,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/student/listings", label: "Browse Listings", icon: Building2 },
+  { href: "/student/saved", label: "Saved Listings", icon: Heart },
   {
     href: "/student/chats",
     label: "Chats",
     icon: MessageSquare,
-  },
-  {
-    href: "/student/saved",
-    label: "Saved Dorms",
-    icon: Heart,
-    badge: "Soon",
   },
 
   {
