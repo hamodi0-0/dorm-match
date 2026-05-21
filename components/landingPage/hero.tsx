@@ -1,5 +1,3 @@
-import { CheckCircle2, Sparkles } from "lucide-react";
-
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-background">
@@ -7,28 +5,15 @@ export default function Hero() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left: Text Content */}
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
-              <Sparkles className="h-4 w-4" />
-              Find Your Perfect Match
-            </div>
-
             <h1 className="text-5xl md:text-6xl font-serif font-medium text-foreground leading-tight">
               Find compatible <span className="text-primary">roommates</span>{" "}
               for university
             </h1>
 
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Match with students who share your lifestyle, study habits, and
-              interests. Make university housing stress-free.
-            </p>
-
-            <div className="mt-4 rounded-lg border-2 border-primary/40 bg-primary/8 px-5 py-4">
-              <p className="text-lg font-bold text-primary leading-relaxed">
-                Try it first →{" "}
-                <span className="font-semibold text-primary/90">
-                  Use the test account in Sign In for a read-only walkthrough
-                </span>
-              </p>
+            <div className="mt-4 inline-block rounded-xl border border-primary/40 bg-primary/8 px-5 py-4">
+              <span className="font-medium text-primary/90">
+                Use the test account in Sign In for a read-only walkthrough
+              </span>
             </div>
           </div>
 
