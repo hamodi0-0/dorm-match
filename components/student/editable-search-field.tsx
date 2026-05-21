@@ -24,6 +24,7 @@ interface EditableSearchFieldProps {
   isSearching?: boolean;
   onSave: (value: string) => void;
   isSaving?: boolean;
+  disabled?: boolean;
 }
 
 export function EditableSearchField({
@@ -36,6 +37,7 @@ export function EditableSearchField({
   isSearching = false,
   onSave,
   isSaving = false,
+  disabled = false,
 }: EditableSearchFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(currentValue);
@@ -58,6 +60,7 @@ export function EditableSearchField({
   }, []);
 
   const enter = () => {
+    if (disabled) return;
     setDraft(currentValue);
     setIsEditing(true);
     setShowDropdown(false);
@@ -239,7 +242,11 @@ export function EditableSearchField({
         <button
           type="button"
           onClick={enter}
-          className="group/value flex flex-1 items-start justify-between gap-2 text-left"
+          className={cn(
+            "group/value flex flex-1 items-start justify-between gap-2 text-left",
+            disabled && "cursor-not-allowed opacity-70",
+          )}
+          disabled={disabled}
           aria-label={`Edit ${label}`}
         >
           <span

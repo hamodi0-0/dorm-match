@@ -12,6 +12,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -27,11 +33,13 @@ import { submitTenantRequest } from "@/app/actions/tenant-actions";
 interface TenantRequestButtonProps {
   listingId: string;
   userId: string | null;
+  isDisabled?: boolean;
 }
 
 export function TenantRequestButton({
   listingId,
   userId,
+  isDisabled = false,
 }: TenantRequestButtonProps) {
   const queryClient = useQueryClient();
   const { data, isLoading } = useTenantRequestStatus(listingId, userId);
@@ -94,76 +102,90 @@ export function TenantRequestButton({
 
   // none | rejected | removed — all show the request button
   return (
-    <>
-      <Button
-        onClick={() => setDialogOpen(true)}
-        className="gap-2"
-        variant="outline"
-      >
-        <UserPlus className="h-4 w-4" />
-        Request to become a tenant
-      </Button>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Request to become a tenant</DialogTitle>
-            <DialogDescription>
-              Send a request to the lister. You can include an optional message
-              to introduce yourself.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label
-                htmlFor="request-message"
-                className="flex items-center gap-1.5"
-              >
-                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                Message{" "}
-                <span className="text-xs text-muted-foreground font-normal">
-                  (optional)
-                </span>
-              </Label>
-              <Textarea
-                id="request-message"
-                placeholder="Hi, I'm a 2nd year student at UCL. I'd love to be listed as a tenant…"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                maxLength={300}
-                className="resize-none min-h-24"
-                disabled={isPending}
-              />
-              <p className="text-xs text-muted-foreground text-right">
-                {message.length}/300
-              </p>
-            </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setDialogOpen(false)}
-                disabled={isPending}
-              >
-                Cancel
+    <TooltipProvider delayDuration={300}>
+      <>
+        {isDisabled ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button className="gap-2" variant="outline" disabled>
+                <UserPlus className="h-4 w-4" />
+                Request to become a tenant
               </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isPending}
-                className="gap-2"
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <UserPlus className="h-4 w-4" />
-                )}
-                Send Request
-              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Disabled for test accounts</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="gap-2"
+            variant="outline"
+          >
+            <UserPlus className="h-4 w-4" />
+            Request to become a tenant
+          </Button>
+        )}
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request to become a tenant</DialogTitle>
+              <DialogDescription>
+                Send a request to the lister. You can include an optional
+                message to introduce yourself.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="request-message"
+                  className="flex items-center gap-1.5"
+                >
+                  <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                  Message{" "}
+                  <span className="text-xs text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Textarea
+                  id="request-message"
+                  placeholder="Hi, I'm a 2nd year student at UCL. I'd love to be listed as a tenant…"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  maxLength={300}
+                  className="resize-none min-h-24"
+                  disabled={isPending}
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {message.length}/300
+                </p>
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                  disabled={isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isPending}
+                  className="gap-2"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-4 w-4" />
+                  )}
+                  Send Request
+                </Button>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+          </DialogContent>
+        </Dialog>
+      </>
+    </TooltipProvider>
   );
 }

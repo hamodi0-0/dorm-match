@@ -11,15 +11,21 @@ import { cn } from "@/lib/utils";
 interface AvatarUploadProps {
   currentUrl: string | null;
   initials: string;
+  disabled?: boolean;
 }
 
-export function AvatarUpload({ currentUrl, initials }: AvatarUploadProps) {
+export function AvatarUpload({
+  currentUrl,
+  initials,
+  disabled = false,
+}: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, remove } = useUploadAvatarMutation();
 
-  const isPending = upload.isPending || remove.isPending;
+  const isPending = upload.isPending || remove.isPending || disabled;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
@@ -32,6 +38,7 @@ export function AvatarUpload({ currentUrl, initials }: AvatarUploadProps) {
   };
 
   const handleRemove = () => {
+    if (disabled) return;
     remove.mutate(undefined, {
       onSuccess: () => toast.success("Avatar removed"),
       onError: (err) =>

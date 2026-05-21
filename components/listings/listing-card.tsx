@@ -36,6 +36,7 @@ import {
 } from "@/hooks/use-saved-listings";
 import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
 import { toast } from "sonner";
+import { useIsTestUser } from "@/hooks/use-test-user";
 
 export function ListingCard({
   listing,
@@ -59,6 +60,7 @@ export function ListingCard({
   const { data: savedListings = [] } = useSavedListingsQuery();
   const { mutate: toggleSave, isPending: isToggleSavePending } =
     useToggleSaveListing();
+  const { isTestUser } = useIsTestUser();
 
   const isSaved = savedListings.some((sl) => sl.listing_id === listing.id);
 
@@ -84,6 +86,7 @@ export function ListingCard({
   const formattedPhone = listing.contact_phone
     ? formatPhoneDisplay(listing.contact_phone)
     : "";
+  const isChatDisabled = isInitChatPending || isTestUser;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -177,18 +180,30 @@ export function ListingCard({
           {/* Action buttons */}
           <div className="flex items-center gap-1.5 z-10">
             {callHref ? (
-              <CallConfirmDialog
-                formattedPhone={formattedPhone}
-                callHref={callHref}
-              >
-                <Button
-                  size="sm"
-                  className="h-8 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
+              isTestUser ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" className="h-8 gap-1.5 text-xs" disabled>
+                      <Phone className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Call</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Disabled for test accounts</TooltipContent>
+                </Tooltip>
+              ) : (
+                <CallConfirmDialog
+                  formattedPhone={formattedPhone}
+                  callHref={callHref}
                 >
-                  <Phone className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Call</span>
-                </Button>
-              </CallConfirmDialog>
+                  <Button
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Call</span>
+                  </Button>
+                </CallConfirmDialog>
+              )
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -206,23 +221,34 @@ export function ListingCard({
               </Tooltip>
             )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              disabled={isInitChatPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                initChat({
-                  listerId: listing.lister_id,
-                  listingId: listing.id,
-                });
-              }}
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Chat</span>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs"
+                  disabled={isChatDisabled}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isTestUser) {
+                      toast.error("Chat is disabled for test accounts");
+                      return;
+                    }
+                    initChat({
+                      listerId: listing.lister_id,
+                      listingId: listing.id,
+                    });
+                  }}
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Chat</span>
+                </Button>
+              </TooltipTrigger>
+              {isTestUser && (
+                <TooltipContent>Disabled for test accounts</TooltipContent>
+              )}
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>

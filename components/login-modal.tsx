@@ -17,6 +17,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import {
+  TEST_ACCOUNT_EMAIL,
+  TEST_ACCOUNT_PASSWORD,
+} from "@/lib/helpers/test-user";
 
 // ── Google SVG icon ──────────────────────────────────────────────────────────
 
@@ -141,6 +145,19 @@ function StudentSignInForm({ onSuccess }: { onSuccess: () => void }) {
         ) : (
           "Sign In"
         )}
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        disabled={isLoading}
+        onClick={() => {
+          setEmail(TEST_ACCOUNT_EMAIL);
+          setPassword(TEST_ACCOUNT_PASSWORD);
+        }}
+      >
+        Use Test Account
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

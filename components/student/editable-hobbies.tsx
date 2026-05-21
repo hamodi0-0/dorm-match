@@ -10,17 +10,20 @@ interface EditableHobbiesProps {
   currentHobbies: string[];
   onSave: (hobbies: string[]) => void;
   isSaving?: boolean;
+  disabled?: boolean;
 }
 
 export function EditableHobbies({
   currentHobbies,
   onSave,
   isSaving = false,
+  disabled = false,
 }: EditableHobbiesProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<string[]>(currentHobbies);
 
   const enter = () => {
+    if (disabled) return;
     setDraft([...currentHobbies]);
     setIsEditing(true);
   };
@@ -52,6 +55,7 @@ export function EditableHobbies({
             variant="ghost"
             size="xs"
             onClick={enter}
+            disabled={disabled}
             className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-6"
           >
             <Pencil className="h-3 w-3" />
@@ -71,6 +75,7 @@ export function EditableHobbies({
           <button
             type="button"
             onClick={enter}
+            disabled={disabled}
             className="w-full text-xs text-muted-foreground italic text-center py-4 border border-dashed border-border rounded-lg hover:border-primary/40 hover:text-primary/60 transition-colors"
           >
             Click to add hobbies &amp; interests

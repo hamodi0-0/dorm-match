@@ -35,6 +35,7 @@ interface EditableFieldProps {
   config?: FieldConfig;
   onSave: (value: string | boolean) => void;
   isSaving?: boolean;
+  disabled?: boolean;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -46,11 +47,13 @@ export function EditableField({
   config = { kind: "text" } as FieldConfig,
   onSave,
   isSaving = false,
+  disabled = false,
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(String(currentValue));
 
   const enter = () => {
+    if (disabled) return;
     setDraft(String(currentValue));
     setIsEditing(true);
   };
@@ -67,7 +70,7 @@ export function EditableField({
   };
 
   return (
-    <div className="flex items-start gap-4 py-3 border-b border-border/50 last:border-0 min-h-[52px]">
+    <div className="flex items-start gap-4 py-3 border-b border-border/50 last:border-0 min-h-13">
       <span className="text-sm text-muted-foreground shrink-0 w-36 pt-1">
         {label}
       </span>
@@ -171,7 +174,11 @@ export function EditableField({
         <button
           type="button"
           onClick={enter}
-          className="group/value flex flex-1 items-start justify-between gap-2 text-left"
+          className={cn(
+            "group/value flex flex-1 items-start justify-between gap-2 text-left",
+            disabled && "cursor-not-allowed opacity-70",
+          )}
+          disabled={disabled}
           aria-label={`Edit ${label}`}
         >
           <span
