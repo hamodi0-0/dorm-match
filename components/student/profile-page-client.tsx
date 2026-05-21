@@ -23,6 +23,7 @@ import { EditableHobbies } from "@/components/student/editable-hobbies";
 import { AvatarUpload } from "@/components/student/avatar-upload";
 import { COMMON_MAJORS } from "@/lib/constants";
 import { useUniversitySearch } from "@/hooks/use-university-search";
+import { useIsTestUser } from "@/hooks/use-test-user";
 
 // ─── Label maps ─────────────────────────────────────────────────────────────
 
@@ -105,6 +106,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
   const [universityQuery, setUniversityQuery] = useState("");
   const { data: universities = [], isLoading: isSearchingUniversities } =
     useUniversitySearch(universityQuery);
+  const { isTestUser } = useIsTestUser();
 
   if (!profile) return null;
 
@@ -113,6 +115,11 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
     isPending && variables !== undefined && field in variables;
 
   const save = (updates: ProfileUpdate) => {
+    if (isTestUser) {
+      toast.error("Profile editing is disabled for test accounts");
+      return;
+    }
+
     updateProfile(updates, {
       onError: (err) => {
         toast.error(
@@ -137,11 +144,21 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
         Click any field to edit it inline
       </p>
 
+      {isTestUser && (
+        <div className="mb-5 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          Test account mode: profile changes are disabled.
+        </div>
+      )}
+
       {/* ── Profile Header ── */}
       <Card className="mb-4 py-0">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
-            <AvatarUpload currentUrl={profile.avatar_url} initials={initials} />
+            <AvatarUpload
+              currentUrl={profile.avatar_url}
+              initials={initials}
+              disabled={isTestUser}
+            />
 
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-serif font-medium text-foreground">
@@ -177,6 +194,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               currentValue={profile.full_name}
               onSave={(v) => save({ full_name: String(v) })}
               isSaving={isSaving("full_name")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Gender"
@@ -187,6 +205,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               config={{ kind: "select", options: GENDER_OPTIONS }}
               onSave={(v) => save({ gender: v as "male" | "female" })}
               isSaving={isSaving("gender")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Phone"
@@ -194,6 +213,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               currentValue={profile.phone ?? ""}
               onSave={(v) => save({ phone: String(v) })}
               isSaving={isSaving("phone")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Bio"
@@ -205,6 +225,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               }}
               onSave={(v) => save({ bio: String(v) })}
               isSaving={isSaving("bio")}
+              disabled={isTestUser}
             />
           </div>
         </CardContent>
@@ -234,6 +255,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
             isSearching={isSearchingUniversities}
             onSave={(v) => save({ university_name: v })}
             isSaving={isSaving("university_name")}
+            disabled={isTestUser}
           />
           <EditableField
             label="Year of Study"
@@ -246,6 +268,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               save({ year_of_study: v as StudentProfile["year_of_study"] })
             }
             isSaving={isSaving("year_of_study")}
+            disabled={isTestUser}
           />
           <EditableSearchField
             label="Major"
@@ -254,6 +277,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
             options={COMMON_MAJORS}
             onSave={(v) => save({ major: v })}
             isSaving={isSaving("major")}
+            disabled={isTestUser}
           />
         </CardContent>
       </Card>
@@ -285,6 +309,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
                 })
               }
               isSaving={isSaving("sleep_schedule")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Cleanliness"
@@ -293,6 +318,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               config={{ kind: "select", options: CLEANLINESS_OPTIONS }}
               onSave={(v) => save({ cleanliness: parseInt(String(v)) })}
               isSaving={isSaving("cleanliness")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Noise Level"
@@ -306,6 +332,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
                 save({ noise_level: v as StudentProfile["noise_level"] })
               }
               isSaving={isSaving("noise_level")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Guests"
@@ -321,6 +348,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
                 })
               }
               isSaving={isSaving("guests_frequency")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Study Location"
@@ -336,6 +364,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
                 })
               }
               isSaving={isSaving("study_location")}
+              disabled={isTestUser}
             />
           </CardContent>
         </Card>
@@ -359,6 +388,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               config={{ kind: "boolean" }}
               onSave={(v) => save({ smoking: Boolean(v) })}
               isSaving={isSaving("smoking")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Pets"
@@ -367,6 +397,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               config={{ kind: "boolean" }}
               onSave={(v) => save({ pets: Boolean(v) })}
               isSaving={isSaving("pets")}
+              disabled={isTestUser}
             />
             <EditableField
               label="Diet"
@@ -382,6 +413,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
                 })
               }
               isSaving={isSaving("diet_preference")}
+              disabled={isTestUser}
             />
           </CardContent>
         </Card>
@@ -402,6 +434,7 @@ export function ProfilePageClient({ userEmail }: ProfilePageClientProps) {
               save({ hobbies });
             }}
             isSaving={isSaving("hobbies")}
+            disabled={isTestUser}
           />
         </CardContent>
       </Card>

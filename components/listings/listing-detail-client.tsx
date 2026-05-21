@@ -28,6 +28,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -47,6 +53,8 @@ import { CompatibilitySection } from "@/components/compatibility/compatibility-s
 import { useStudentProfile } from "@/hooks/use-student-profile";
 import { useInitChat } from "@/hooks/use-init-chat";
 import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
+import { toast } from "sonner";
+import { useIsTestUser } from "@/hooks/use-test-user";
 import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
 
 interface ListingDetailClientProps {
@@ -266,6 +274,7 @@ export function ListingDetailClient({
 }: ListingDetailClientProps) {
   const { data: viewerProfile } = useStudentProfile();
   const { mutate: initChat, isPending: isInitChatPending } = useInitChat();
+  const { isTestUser } = useIsTestUser();
   const [descExpanded, setDescExpanded] = useState(false);
 
   const images = listing.listing_images ?? [];
@@ -283,6 +292,7 @@ export function ListingDetailClient({
   const dialablePhone = getDialablePhone(listing.contact_phone);
   const callHref = dialablePhone ? `tel:${dialablePhone}` : null;
   const formattedPhone = formatPhoneDisplay(listing.contact_phone);
+  const isChatDisabled = isInitChatPending || isTestUser;
 
   const fullAddress = [
     listing.address_line,
@@ -492,7 +502,11 @@ export function ListingDetailClient({
 
           {/* Request to join — for multi-occupancy listings */}
           {listing.max_occupants > 1 && (
-            <TenantRequestButton listingId={listing.id} userId={userId} />
+            <TenantRequestButton
+              listingId={listing.id}
+              userId={userId}
+              isDisabled={isTestUser}
+            />
           )}
 
           <Card className="py-0">
@@ -572,43 +586,82 @@ export function ListingDetailClient({
 
               <div className="border-t border-border/50" />
 
-              <div className="space-y-2.5">
-                {callHref ? (
-                  <CallConfirmDialog
-                    formattedPhone={formattedPhone}
-                    callHref={callHref}
-                  >
-                    <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10">
-                      <Phone className="h-4 w-4" />
-                      Call Lister
-                    </Button>
-                  </CallConfirmDialog>
-                ) : (
-                  <Button
-                    className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10"
-                    disabled
-                  >
-                    <Phone className="h-4 w-4" />
-                    Call Lister
-                  </Button>
-                )}
-                {userId !== listing.lister_id && (
-                  <Button
-                    variant="outline"
-                    className="w-full gap-2 h-10"
-                    disabled={isInitChatPending}
-                    onClick={() =>
-                      initChat({
-                        listerId: listing.lister_id,
-                        listingId: listing.id,
-                      })
-                    }
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Dormr Chat
-                  </Button>
-                )}
-              </div>
+              <TooltipProvider delayDuration={300}>
+                <div className="space-y-2.5">
+                  {callHref ? (
+                    isTestUser ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10"
+                            disabled
+                          >
+                            <Phone className="h-4 w-4" />
+                            Call Lister
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Disabled for test accounts
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <CallConfirmDialog
+                        formattedPhone={formattedPhone}
+                        callHref={callHref}
+                      >
+                        <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10">
+                          <Phone className="h-4 w-4" />
+                          Call Lister
+                        </Button>
+                      </CallConfirmDialog>
+                    )
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground h-10"
+                          disabled
+                        >
+                          <Phone className="h-4 w-4" />
+                          Call Lister
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Contact coming soon</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {userId !== listing.lister_id && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 h-10"
+                          disabled={isChatDisabled}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isTestUser) {
+                              toast.error("Chat is disabled for test accounts");
+                              return;
+                            }
+                            initChat({
+                              listerId: listing.lister_id,
+                              listingId: listing.id,
+                            });
+                          }}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Dormr Chat
+                        </Button>
+                      </TooltipTrigger>
+                      {isTestUser && (
+                        <TooltipContent>
+                          Disabled for test accounts
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  )}
+                </div>
+              </TooltipProvider>
 
               <div className="space-y-2 pt-1">
                 {[

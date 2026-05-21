@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { isTestAccount } from "@/lib/helpers/test-user";
 
 const tenantRequestSchema = z.object({
   listing_id: z.string().uuid(),
@@ -17,6 +18,8 @@ export async function submitTenantRequest(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+  if (isTestAccount(user.email))
+    return { error: "Action disabled for test accounts" };
 
   const parsed = tenantRequestSchema.safeParse({
     listing_id: formData.get("listing_id"),
@@ -88,6 +91,8 @@ export async function acceptTenantRequest(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+  if (isTestAccount(user.email))
+    return { error: "Action disabled for test accounts" };
 
   const { data: request } = await supabase
     .from("tenant_requests")
@@ -133,6 +138,8 @@ export async function rejectTenantRequest(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+  if (isTestAccount(user.email))
+    return { error: "Action disabled for test accounts" };
 
   const { data: request } = await supabase
     .from("tenant_requests")
@@ -171,6 +178,8 @@ export async function removeTenant(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+  if (isTestAccount(user.email))
+    return { error: "Action disabled for test accounts" };
 
   const { data: listing } = await supabase
     .from("listings")

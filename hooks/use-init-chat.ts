@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { isTestAccount } from "@/lib/helpers/test-user";
 
 interface InitChatParams {
   listerId: string;
@@ -20,6 +21,8 @@ export function useInitChat() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+      if (isTestAccount(user.email))
+        throw new Error("Action disabled for test accounts");
 
       // Check if conversation already exists (same student, lister, and listing)
       const { data: existing, error: existingError } = await supabase

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { StudentProfile } from "@/hooks/use-student-profile";
 import type { ProfileUpdate } from "@/lib/schemas/profile-edit-schema";
+import { isTestAccount } from "@/lib/helpers/test-user";
 
 const updateStudentProfile = async (
   updates: ProfileUpdate,
@@ -15,6 +16,8 @@ const updateStudentProfile = async (
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error("Not authenticated");
+  if (isTestAccount(user.email))
+    throw new Error("Action disabled for test accounts");
 
   const { data, error } = await supabase
     .from("student_profiles")

@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { isTestAccount } from "@/lib/helpers/test-user";
 
 const BUCKET = "avatars";
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
@@ -20,6 +21,8 @@ const uploadAvatar = async (file: File): Promise<void> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+  if (isTestAccount(user.email))
+    throw new Error("Action disabled for test accounts");
 
   const ext = file.type.split("/")[1];
   const path = `${user.id}/avatar.${ext}`;
@@ -52,6 +55,8 @@ const removeAvatar = async (): Promise<void> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+  if (isTestAccount(user.email))
+    throw new Error("Action disabled for test accounts");
 
   // Remove all common extensions — we don't know which one was uploaded
   await supabase.storage

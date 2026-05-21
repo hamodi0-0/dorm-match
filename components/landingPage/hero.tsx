@@ -22,20 +22,13 @@ export default function Hero() {
               interests. Make university housing stress-free.
             </p>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center gap-6 pt-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                <span>Free to use</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                <span>Verified students</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                <span>Secure &amp; private</span>
-              </div>
+            <div className="mt-4 rounded-lg border-2 border-primary/40 bg-primary/8 px-5 py-4">
+              <p className="text-lg font-bold text-primary leading-relaxed">
+                Try it first →{" "}
+                <span className="font-semibold text-primary/90">
+                  Use the test account in Sign In for a read-only walkthrough
+                </span>
+              </p>
             </div>
           </div>
 
