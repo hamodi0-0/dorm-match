@@ -1,3 +1,7 @@
+import { Car, Dumbbell, Home, Shirt, Wifi, Zap } from "lucide-react";
+
+import type { ListingDetailAmenity } from "@/lib/types/listing-detail";
+
 export const COMMON_HOBBIES = [
   "Reading",
   "Gaming",
@@ -263,6 +267,17 @@ export const EMPTY_FILTERS = {
   maxPrice: null,
   genderPreference: null,
 };
+
+export const LISTING_DETAIL_DESCRIPTION_PREVIEW_LENGTH = 300;
+
+export const AMENITY_CONFIG = [
+  { key: "furnished" as const, label: "Furnished", icon: Home },
+  { key: "wifi" as const, label: "WiFi Included", icon: Wifi },
+  { key: "parking" as const, label: "Covered Parking", icon: Car },
+  { key: "laundry" as const, label: "Laundry", icon: Shirt },
+  { key: "gym" as const, label: "Gym Access", icon: Dumbbell },
+  { key: "bills_included" as const, label: "Bills Included", icon: Zap },
+] satisfies ListingDetailAmenity[];
 
 export const YEAR_LABELS: Record<string, string> = {
   "1st_year": "1st Year",

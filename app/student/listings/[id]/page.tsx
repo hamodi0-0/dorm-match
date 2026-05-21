@@ -48,7 +48,6 @@ export default async function ListingDetailPage({
   if (listingResult.error || !listingResult.data) notFound();
 
   const tenantUserIds = (tenantRowsResult.data ?? []).map((r) => r.user_id);
-  const tenantCount = tenantUserIds.length;
 
   // Whether the current student is already listed as a tenant
   const isViewerTenant = tenantUserIds.includes(user.id);
@@ -71,7 +70,6 @@ export default async function ListingDetailPage({
   return (
     <ListingDetailClient
       listing={listingResult.data as Listing}
-      tenantCount={tenantCount}
       tenantProfiles={tenantProfiles}
       userId={user.id}
       isViewerTenant={isViewerTenant}
