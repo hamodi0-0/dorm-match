@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -9,18 +8,11 @@ import {
   Calendar,
   Clock,
   Users,
-  Wifi,
-  Car,
-  Dumbbell,
-  Zap,
-  Home,
   ChevronDown,
   ChevronUp,
   Phone,
   MessageCircle,
   ExternalLink,
-  Images,
-  Shirt,
   Shield,
   GraduationCap,
 } from "lucide-react";
@@ -33,19 +25,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import type { Listing, ListingImage } from "@/lib/types/listing";
 import {
-  ROOM_TYPE_LABELS,
   BILLING_PERIOD_SUFFIX,
+  ROOM_TYPE_LABELS,
   GENDER_PREFERENCE_LABELS,
 } from "@/lib/types/listing";
 import { TenantRequestButton } from "@/components/tenants/tenant-request-button";
@@ -55,16 +39,20 @@ import { useInitChat } from "@/hooks/use-init-chat";
 import { CallConfirmDialog } from "@/components/listings/call-confirm-dialog";
 import { toast } from "sonner";
 import { useIsTestUser } from "@/hooks/use-test-user";
-import type { TenantCompatibilityProfile } from "@/lib/types/compatibility";
-
-interface ListingDetailClientProps {
-  listing: Listing;
-  tenantCount: number;
-  /** Other tenants only — viewer's profile already filtered out server-side */
-  tenantProfiles: TenantCompatibilityProfile[];
-  userId: string;
-  isViewerTenant: boolean;
-}
+import { getDialablePhone, formatPhoneDisplay } from "@/lib/helpers/phone";
+import {
+  buildGoogleMapsSearchUrl,
+  buildListingFullAddress,
+  formatListingAvailableDate,
+  formatListingAvailableShortDate,
+  formatListingMinStay,
+  getListingActiveAmenities,
+  getListingDescriptionPreview,
+  shouldTruncateListingDescription,
+} from "@/lib/helpers/listing-detail";
+import { ListingDetailImageGallery } from "@/components/listings/listing-detail-gallery";
+import { ListingDetailStatBadge } from "@/components/listings/listing-detail-stat-badge";
+import type { ListingDetailClientProps } from "@/lib/types/listing-detail";
 
 const ListingDetailMap = dynamic(
   () =>
@@ -80,189 +68,6 @@ const ListingDetailMap = dynamic(
     ),
   },
 );
-
-const AMENITY_CONFIG = [
-  { key: "furnished" as const, label: "Furnished", icon: Home },
-  { key: "wifi" as const, label: "WiFi Included", icon: Wifi },
-  { key: "parking" as const, label: "Covered Parking", icon: Car },
-  { key: "laundry" as const, label: "Laundry", icon: Shirt },
-  { key: "gym" as const, label: "Gym Access", icon: Dumbbell },
-  { key: "bills_included" as const, label: "Bills Included", icon: Zap },
-] satisfies {
-  key: keyof Listing;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-}[];
-
-function getDialablePhone(phone: string): string | null {
-  const parsed = parsePhoneNumberFromString(phone, "EG");
-  if (parsed) return parsed.number;
-
-  const cleaned = phone.replace(/[^\d+]/g, "").trim();
-  return cleaned.length > 0 ? cleaned : null;
-}
-
-function formatPhoneDisplay(phone: string): string {
-  const parsed = parsePhoneNumberFromString(phone, "EG");
-  return parsed?.formatInternational() ?? phone;
-}
-
-// ─── Image Gallery ────────────────────────────────────────────────────────────
-
-function ImageGallery({ images }: { images: ListingImage[] }) {
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  const sorted = [...images].sort((a, b) => {
-    if (a.is_cover) return -1;
-    if (b.is_cover) return 1;
-    return a.position - b.position;
-  });
-
-  const cover = sorted[0];
-  const thumbnails = sorted.slice(1, 3);
-  const hasMore = images.length > 3;
-  const extraCount = images.length - 3;
-
-  if (!images.length) {
-    return (
-      <div className="w-full h-64 sm:h-80 lg:h-96 rounded-xl bg-muted flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <Home className="h-12 w-12 opacity-20" />
-          <span className="text-sm">No photos available</span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="grid grid-cols-3 gap-2 h-64 sm:h-80 lg:h-105 rounded-xl overflow-hidden">
-        <div
-          className="col-span-2 relative cursor-pointer group overflow-hidden"
-          onClick={() => {
-            setActiveIdx(0);
-            setGalleryOpen(true);
-          }}
-        >
-          <Image
-            src={cover.public_url}
-            alt="Main photo"
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 66vw, (max-width: 1024px) 50vw, 660px"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          {thumbnails.map((img, idx) => (
-            <div
-              key={img.id}
-              className="flex-1 relative cursor-pointer group overflow-hidden"
-              onClick={() => {
-                setActiveIdx(idx + 1);
-                setGalleryOpen(true);
-              }}
-            >
-              <Image
-                src={img.public_url}
-                alt={`Photo ${idx + 2}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 220px"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-              {idx === 1 && hasMore && (
-                <div
-                  className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveIdx(0);
-                    setGalleryOpen(true);
-                  }}
-                >
-                  <Images className="h-5 w-5 text-white" />
-                  <span className="text-white text-xs font-semibold">
-                    +{extraCount} more
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <DialogContent className="max-w-4xl w-full p-0 gap-0 overflow-hidden bg-background">
-          <DialogHeader className="px-4 py-3 border-b border-border">
-            <DialogTitle className="text-sm font-medium">
-              {activeIdx + 1} / {sorted.length}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="relative h-[60vh] bg-black">
-            <Image
-              src={sorted[activeIdx].public_url}
-              alt={`Photo ${activeIdx + 1}`}
-              fill
-              className="object-contain"
-              sizes="90vw"
-            />
-          </div>
-          {sorted.length > 1 && (
-            <div className="flex gap-2 p-3 overflow-x-auto bg-muted/30">
-              {sorted.map((img, idx) => (
-                <button
-                  key={img.id}
-                  onClick={() => setActiveIdx(idx)}
-                  className={cn(
-                    "relative h-14 w-20 shrink-0 rounded overflow-hidden border-2 transition-all",
-                    idx === activeIdx
-                      ? "border-primary"
-                      : "border-transparent opacity-60 hover:opacity-100",
-                  )}
-                >
-                  <Image
-                    src={img.public_url}
-                    alt={`Thumb ${idx + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
-
-// ─── Stat Badge ───────────────────────────────────────────────────────────────
-
-function StatBadge({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-        <Icon className="h-3.5 w-3.5 text-primary" />
-      </div>
-      <div>
-        <p className="text-xs text-muted-foreground leading-none">{label}</p>
-        <p className="text-sm font-semibold text-foreground mt-0.5">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -280,38 +85,28 @@ export function ListingDetailClient({
   const images = listing.listing_images ?? [];
   const priceSuffix = BILLING_PERIOD_SUFFIX[listing.billing_period] ?? "/mo";
 
-  const availableDate = new Date(listing.available_from).toLocaleDateString(
-    "en-GB",
-    { day: "numeric", month: "long", year: "numeric" },
+  const availableDate = formatListingAvailableDate(listing.available_from);
+  const availableShortDate = formatListingAvailableShortDate(
+    listing.available_from,
   );
 
-  const activeAmenities = AMENITY_CONFIG.filter(
-    ({ key }) => listing[key] === true,
-  );
+  const activeAmenities = getListingActiveAmenities(listing);
 
   const dialablePhone = getDialablePhone(listing.contact_phone);
   const callHref = dialablePhone ? `tel:${dialablePhone}` : null;
   const formattedPhone = formatPhoneDisplay(listing.contact_phone);
   const isChatDisabled = isInitChatPending || isTestUser;
 
-  const fullAddress = [
-    listing.address_line,
-    listing.city,
-    listing.postcode,
-    listing.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const fullAddress = buildListingFullAddress(listing);
+  const mapsUrl = buildGoogleMapsSearchUrl(fullAddress);
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
-
-  const shouldTruncateDesc =
-    listing.description && listing.description.length > 300;
-
-  const displayDesc =
-    shouldTruncateDesc && !descExpanded
-      ? listing.description!.slice(0, 300) + "…"
-      : listing.description;
+  const shouldTruncateDesc = shouldTruncateListingDescription(
+    listing.description,
+  );
+  const displayDesc = getListingDescriptionPreview(
+    listing.description,
+    descExpanded,
+  );
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
@@ -324,7 +119,7 @@ export function ListingDetailClient({
       </Link>
 
       <div className="relative mb-6">
-        <ImageGallery images={images} />
+        <ListingDetailImageGallery images={images} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 xl:gap-8">
@@ -340,17 +135,17 @@ export function ListingDetailClient({
               </span>
             </div>
             <div className="flex flex-wrap gap-4">
-              <StatBadge
+              <ListingDetailStatBadge
                 icon={Users}
                 label="Max Occupants"
                 value={String(listing.max_occupants)}
               />
-              <StatBadge
+              <ListingDetailStatBadge
                 icon={Clock}
                 label="Min Stay"
-                value={`${listing.min_stay_months} month${listing.min_stay_months !== 1 ? "s" : ""}`}
+                value={formatListingMinStay(listing.min_stay_months)}
               />
-              <StatBadge
+              <ListingDetailStatBadge
                 icon={Calendar}
                 label="Available"
                 value={availableDate}
@@ -575,11 +370,7 @@ export function ListingDetailClient({
                   </Badge>
                   <span className="text-xs text-muted-foreground">·</span>
                   <span className="text-xs text-muted-foreground">
-                    Available{" "}
-                    {new Date(listing.available_from).toLocaleDateString(
-                      "en-GB",
-                      { day: "numeric", month: "short" },
-                    )}
+                    Available {availableShortDate}
                   </span>
                 </div>
               </div>
@@ -667,7 +458,7 @@ export function ListingDetailClient({
                 {[
                   {
                     label: "Min stay",
-                    value: `${listing.min_stay_months} month${listing.min_stay_months !== 1 ? "s" : ""}`,
+                    value: formatListingMinStay(listing.min_stay_months),
                   },
                   {
                     label: "Max occupants",
