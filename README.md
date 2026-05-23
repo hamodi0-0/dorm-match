@@ -1,6 +1,6 @@
 # Dormr
 
-![Dormr logo](public/images/rounded-logo.png)
+<img src="public/images/rounded-logo.png" width="100" alt="Dormr logo" />
 
 Dormr is a student housing marketplace for university students and listers. It helps students find compatible accommodation, message listers in real time, and manage tenant requests. Listers get their own dashboard for listings, applications, notifications, and analytics.
 

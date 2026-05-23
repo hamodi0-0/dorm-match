@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Github, Linkedin } from "lucide-react";
 
 export function Footer() {
   const handleNavClick = (
@@ -39,6 +40,29 @@ export function Footer() {
               Find your perfect university roommate match based on lifestyle
               compatibility.
             </p>
+            <div className="flex items-center gap-4 mt-4">
+              <a
+                href="https://github.com/abu7mza/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Mohamed's GitHub"
+              >
+                <Github className="h-4 w-4" />
+                <span>abu7mza</span>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/mohamed-hamza-83a1a636b/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Mohamed's LinkedIn"
+              >
+                <Linkedin className="h-4 w-4" />
+                <span>LinkedIn</span>
+              </a>
+            </div>
           </div>
 
           {/* Product */}
