@@ -1,10 +1,10 @@
 # Dormr
 
-![Dormr logo](public/images/logo-full.png)
+![Dormr logo](public/images/rounded-logo.png)
 
 Dormr is a student housing marketplace for university students and listers. It helps students find compatible accommodation, message listers in real time, and manage tenant requests. Listers get their own dashboard for listings, applications, notifications, and analytics.
 
-## What it does
+## Core features
 
 - Matches students to listings and current tenants using a compatibility algorithm.
 - Supports separate student and lister accounts.
@@ -15,16 +15,6 @@ Dormr is a student housing marketplace for university students and listers. It h
 - Supports dark mode and light mode.
 - Responsive and mobile-friendly.
 
-## Core features
-
-- Compatibility matching for roommate and listing fit.
-- Real-time chat between students and listers.
-- Student and lister dashboards with charts and status cards.
-- Listing management, tenant requests, approvals, and notifications.
-- Saved listings and profile management.
-- Map-based listing location views.
-- Mobile-first responsive layout.
-
 ## Tech stack
 
 - Next.js 16 with the App Router
@@ -32,18 +22,6 @@ Dormr is a student housing marketplace for university students and listers. It h
 - TypeScript
 - Supabase for auth, Postgres, realtime, and storage
 - Tailwind CSS 4
-- React Query for data fetching, caching, and prefetching
-- Zustand for client state
-- React Hook Form for forms
-- Zod for validation
-- Recharts for charts and analytics
-- Leaflet for maps
-- shadcn/ui for UI primitives
-- Lucide React for icons
-- Sonner for toast notifications
-
-## Notable libraries
-
 - `zod` for runtime validation and schema safety
 - `@tanstack/react-query` for caching and prefetching
 - `recharts` for lister analytics charts
@@ -52,27 +30,21 @@ Dormr is a student housing marketplace for university students and listers. It h
 - `zustand` for persisted client state
 - `sonner` for notifications
 - `lucide-react` for iconography
-- `@supabase/supabase-js` and `@supabase/ssr` for Supabase integration
 
-### Dashboards
+## App Images
 
-| Student dashboard                                    | Lister dashboard                                    |
-| ---------------------------------------------------- | --------------------------------------------------- |
-| ![Student dashboard](public/images/s-dashboard.jpeg) | ![Lister dashboard](public/images/l-dashboard.jpeg) |
-
-### App screenshots
-
-| Screenshot 1                                                                          | Screenshot 2                                                                          |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ![Screenshot 1](public/images/WhatsApp%20Image%202026-05-20%20at%203.52.36%20PM.jpeg) | ![Screenshot 2](public/images/WhatsApp%20Image%202026-05-20%20at%203.56.23%20PM.jpeg) |
-
-| Screenshot 3                                                                          | Screenshot 4                                                                          |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ![Screenshot 3](public/images/WhatsApp%20Image%202026-05-20%20at%203.57.43%20PM.jpeg) | ![Screenshot 4](public/images/WhatsApp%20Image%202026-05-20%20at%204.01.34%20PM.jpeg) |
-
-| Screenshot 5                                                                          |
-| ------------------------------------------------------------------------------------- |
-| ![Screenshot 5](public/images/WhatsApp%20Image%202026-05-21%20at%206.37.06%20PM.jpeg) |
+<div>
+  <img src="public/images/s-dashboard.jpeg" alt="Student dashboard" width="49%" />
+  <img src="public/images/l-dashboard.jpeg" alt="Lister dashboard" width="49%" />
+  <br />
+  <img src="public/images/l-my-listings.jpeg" alt="Lister listings" width="49%" />
+  <img src="public/images/s-browse-listings.jpeg" alt="Browse listings" width="49%" />
+  <br />
+  <img src="public/images/s-listing-details.jpeg" alt="Listing details" width="49%" />
+  <img src="public/images/chat-window.jpeg" alt="Chat window" width="49%" />
+  <br />
+  <img src="public/images/compatibility.jpeg" alt="Compatibility" width="49%" />
+</div>
 
 ## Local setup
 
