@@ -1,6 +1,6 @@
 # Dormr
 
-![Dormr logo](public/images/logo-full.png)
+![Dormr logo](public/images/rounded-logo.png)
 
 Dormr is a student housing marketplace for university students and listers. It helps students find compatible accommodation, message listers in real time, and manage tenant requests. Listers get their own dashboard for listings, applications, notifications, and analytics.
 
@@ -32,18 +32,6 @@ Dormr is a student housing marketplace for university students and listers. It h
 - TypeScript
 - Supabase for auth, Postgres, realtime, and storage
 - Tailwind CSS 4
-- React Query for data fetching, caching, and prefetching
-- Zustand for client state
-- React Hook Form for forms
-- Zod for validation
-- Recharts for charts and analytics
-- Leaflet for maps
-- shadcn/ui for UI primitives
-- Lucide React for icons
-- Sonner for toast notifications
-
-## Notable libraries
-
 - `zod` for runtime validation and schema safety
 - `@tanstack/react-query` for caching and prefetching
 - `recharts` for lister analytics charts
@@ -52,7 +40,6 @@ Dormr is a student housing marketplace for university students and listers. It h
 - `zustand` for persisted client state
 - `sonner` for notifications
 - `lucide-react` for iconography
-- `@supabase/supabase-js` and `@supabase/ssr` for Supabase integration
 
 ### Dashboards
 
