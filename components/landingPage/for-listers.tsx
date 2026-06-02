@@ -11,7 +11,7 @@ export default function ForListers() {
 
   return (
     <FadeInSection>
-      <section id="for-listers" className="py-32 bg-background">
+      <section id="for-listers" className="py-64 bg-background">
         <div className="max-w-4xl mx-auto px-6">
           <div className="border border-border rounded-2xl p-8 md:p-12 bg-card">
             {/* Header */}

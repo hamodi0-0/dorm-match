@@ -105,11 +105,6 @@ export default async function ListerDashboardPage() {
           .in("id", profileIdsToFetch)
       : { data: [] };
 
-  console.log("Fetched profiles:", fetchedProfiles);
-
-  console.log("Tenants Result Data:", tenantsResult.data);
-  console.log("Requests Result Data:", requestsResult.data);
-
   const profileMap = new Map((fetchedProfiles ?? []).map((p) => [p.id, p]));
 
   const tenants: DashboardTenant[] = (tenantsResult.data ?? [])

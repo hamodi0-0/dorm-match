@@ -26,7 +26,7 @@ export default function HowItWorks() {
   };
   return (
     <FadeInSection>
-      <section id="how-it-works" className="py-32 bg-accent/30 overflow-hidden">
+      <section id="how-it-works" className="py-32 bg-accent overflow-hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-24">
             <h2 className="text-4xl font-serif font-medium text-foreground mb-4">

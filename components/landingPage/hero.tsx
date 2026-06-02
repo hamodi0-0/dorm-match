@@ -31,7 +31,7 @@ export default function Hero() {
             <div className="relative w-full flex items-center justify-end">
               <div className="group relative w-full aspect-4/3 md:-mr-16 lg:-mr-32">
                 {/* Main orange bubble */}
-                <div className="absolute left-6 top-4 z-0 h-36 w-36 rounded-[2rem] bg-primary/18 dark:bg-primary/60 shadow-[0_26px_50px_-36px_rgba(0,0,0,0.35)] ring-1 ring-primary/20 transition-transform duration-300 hover:scale-110 md:left-24 md:top-16 md:h-56 md:w-56"></div>
+                <div className="absolute left-6 top-4 z-0 h-36 w-36 rounded-[2rem] bg-primary/18 dark:bg-primary/60 shadow-[0_26px_50px_-36px_rgba(0,0,0,0.35)] ring-1 ring-primary/20 transition-transform duration-300 hover:scale-105 md:left-24 md:top-16 md:h-56 md:w-56"></div>
                 {/* Match card */}
                 <div className="absolute right-6 top-4 z-0 h-20 w-20 rounded-[1.5rem] border border-border/70 dark:border-border dark:bg-muted/99 bg-card/90 shadow-[0_22px_40px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-transform duration-300 hover:scale-110 md:right-20 md:top-16 md:h-28 md:w-28 lg:right-18 lg:top-16">
                   <div className="flex h-full w-full items-center justify-center p-3"></div>
